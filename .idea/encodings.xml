@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/componentsets/kradfile" charset="EUC-JP" />
+    <file url="file://$PROJECT_DIR$/componentsets/kradfile2" charset="EUC-JP" />
+    <file url="file://$PROJECT_DIR$/componentsets/radkfile" charset="EUC-JP" />
+    <file url="file://$PROJECT_DIR$/componentsets/radkfile2" charset="EUC-JP" />
+    <file url="file://$PROJECT_DIR$/componentsets/radkfilex" charset="EUC-JP" />
+  </component>
+</project>
