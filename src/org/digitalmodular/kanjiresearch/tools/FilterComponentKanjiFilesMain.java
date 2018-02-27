@@ -52,7 +52,7 @@ import org.digitalmodular.kanjiresearch.util.TaggedKanjiList;
  * @author Mark Jeronimus
  */
 // Created 2018-02-17
-public final class FilterComponentKanjiFiles {
+public final class FilterComponentKanjiFilesMain {
 	public static void main(String... args) throws IOException {
 		System.setProperty("line.separator", "\n");
 
