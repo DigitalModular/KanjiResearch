@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 public final class ComponentFileIO {
 	private ComponentFileIO() { throw new AssertionError(); }
 
-	public static void write(Collection<ComponentFileEntry> components, String filename) throws IOException {
+	public static void write(Collection<TaggedKanjiList> components, String filename) throws IOException {
 		List<String> lines = components.stream()
 		                               .map(ComponentFileIO::toComponentString)
 		                               .collect(Collectors.toList());
@@ -51,18 +51,18 @@ public final class ComponentFileIO {
 		Files.write(Paths.get(filename), lines, StandardCharsets.UTF_8);
 	}
 
-	public static List<ComponentFileEntry> read(String filename) throws IOException {
+	public static List<TaggedKanjiList> read(String filename) throws IOException {
 		return Files.lines(Paths.get(filename), StandardCharsets.UTF_8)
 		            .map(ComponentFileIO::fromComponentString)
 		            .collect(Collectors.toList());
 	}
 
-	private static String toComponentString(ComponentFileEntry entry) {
-		return entry.getRadicalAsString() + '\t' + entry.getKanjiString();
+	private static String toComponentString(TaggedKanjiList entry) {
+		return entry.getComponentAsString() + '\t' + entry.getKanjiString();
 	}
 
-	private static ComponentFileEntry fromComponentString(String line) {
-		ComponentFileEntry entry = new ComponentFileEntry(line.codePointAt(0));
+	private static TaggedKanjiList fromComponentString(String line) {
+		TaggedKanjiList entry = new TaggedKanjiList(line.codePointAt(0));
 
 		line.codePoints()
 		    .skip(2)

@@ -35,14 +35,14 @@ import java.util.List;
 import org.digitalmodular.graphapi.Graph;
 import org.digitalmodular.graphapi.GraphIO;
 import org.digitalmodular.graphapi.MatrixGraph;
-import org.digitalmodular.kanjiresearch.util.ComponentFileEntry;
 import org.digitalmodular.kanjiresearch.util.ComponentFileIO;
 import org.digitalmodular.kanjiresearch.util.KanjiList;
+import org.digitalmodular.kanjiresearch.util.TaggedKanjiList;
 
 /**
  * Creates graphs where kanji are nodes and shared components are connections.
  * <p>
- * Requires: <tt>*-set.utf8</tt>, <tt>*-components.utf8</tt>
+ * Requires: <tt>*-components.utf8</tt>
  * <p>
  * Produces: <tt>*-graph.conn</tt>, <tt>*-graph.txt</tt>
  *
@@ -63,14 +63,14 @@ public final class MakeKanjiGraphsMain {
 	}
 
 	private static void process(String filenameIn) throws IOException {
-		List<ComponentFileEntry> components = ComponentFileIO.read(filenameIn);
+		List<TaggedKanjiList> componentLists = ComponentFileIO.read(filenameIn);
 
-		KanjiList kanjiSet = collectKanji(components);
+		KanjiList kanjiSet = collectKanji(componentLists);
 
 		Graph graph = new MatrixGraph(kanjiSet.size());
 
-		for (ComponentFileEntry component : components)
-			addCluster(component, kanjiSet, graph);
+		for (TaggedKanjiList componentList : componentLists)
+			addCluster(componentList, kanjiSet, graph);
 
 		write(graph, filenameIn, "-graph.txt");
 		write(graph, filenameIn, "-graph.conn");
@@ -78,18 +78,18 @@ public final class MakeKanjiGraphsMain {
 			write(graph, filenameIn, "-graph.png");
 	}
 
-	private static KanjiList collectKanji(Iterable<? extends KanjiList> components) {
-		KanjiList kanjiInSet = new KanjiList();
-		components.forEach(kanjiInSet::addAll);
-		return kanjiInSet;
+	private static KanjiList collectKanji(Iterable<? extends KanjiList> componentLists) {
+		KanjiList kanjiSet = new KanjiList();
+		componentLists.forEach(kanjiSet::addAll);
+		return kanjiSet;
 	}
 
-	private static void addCluster(KanjiList component, KanjiList kanjiInSet, Graph graph) {
-		int n = component.size();
+	private static void addCluster(KanjiList componentList, KanjiList kanjiSet, Graph graph) {
+		int n = componentList.size();
 		for (int i = 1; i < n; i++) {
-			int node1 = kanjiInSet.indexOf(component.get(i));
+			int node1 = kanjiSet.indexOf(componentList.get(i));
 			for (int j = 0; j < i; j++) {
-				int node2 = kanjiInSet.indexOf(component.get(j));
+				int node2 = kanjiSet.indexOf(componentList.get(j));
 
 				graph.setConnection(node1, node2);
 			}

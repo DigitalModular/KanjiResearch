@@ -30,19 +30,19 @@ package org.digitalmodular.kanjiresearch.util;
  * @author Mark Jeronimus
  */
 // Created 2018-02-17
-public class ComponentFileEntry extends KanjiList {
-	private final int radical;
+public class TaggedKanjiList extends KanjiList {
+	private final int tag;
 
-	public ComponentFileEntry(int radical) {
-		this.radical = radical;
+	public TaggedKanjiList(int tag) {
+		this.tag = tag;
 	}
 
-	public int getRadical()            { return radical; }
+	public int getTag()                  { return tag; }
 
-	public String getRadicalAsString() { return new String(new int[]{radical}, 0, 1); }
+	public String getComponentAsString() { return new String(new int[]{tag}, 0, 1); }
 
 	@Override
 	public String toString() {
-		return new String(new int[]{radical}, 0, 1) + '\t' + super.toString();
+		return new String(new int[]{tag}, 0, 1) + '\t' + super.toString();
 	}
 }

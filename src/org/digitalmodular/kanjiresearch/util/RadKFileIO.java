@@ -49,15 +49,15 @@ public final class RadKFileIO {
 
 	private static final Pattern COMPONENT_PATTERN = Pattern.compile("^\\$ (.) [0-9]*.*$");
 
-	public static List<ComponentFileEntry> read(String filename, String charset) throws IOException {
+	public static List<TaggedKanjiList> read(String filename, String charset) throws IOException {
 		Stream<String> lines = Files.lines(Paths.get(filename), Charset.forName(charset));
 
-		LinkedList<ComponentFileEntry> components = new LinkedList<>();
+		LinkedList<TaggedKanjiList> components = new LinkedList<>();
 
 		lines.forEach(line -> {
 			Matcher matcher = COMPONENT_PATTERN.matcher(line);
 			if (matcher.matches())
-				components.add(new ComponentFileEntry(matcher.group(1).codePointAt(0)));
+				components.add(new TaggedKanjiList(matcher.group(1).codePointAt(0)));
 			else if (!components.isEmpty())
 				components.getLast().addAll(line.codePoints()
 				                                .boxed()

@@ -31,33 +31,28 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.digitalmodular.kanjiresearch.util.ComponentFileEntry;
 import org.digitalmodular.kanjiresearch.util.ComponentFileIO;
 import org.digitalmodular.kanjiresearch.util.KanjiList;
 import org.digitalmodular.kanjiresearch.util.KanjiSetFileIO;
 import org.digitalmodular.kanjiresearch.util.RadKFileIO;
+import org.digitalmodular.kanjiresearch.util.TaggedKanjiList;
 
 /**
  * Filters the component list to only the kanji of each set.
  * <p>
  * Requires: <tt>radkfilex</tt>, <tt>*-set.utf8</tt>
  * <p>
- * Produces: <tt>*-components.utf8</tt>
+ * Produces: <tt>*-components.utf8</tt>, <tt>*-component-frequencies.tsv</tt>
  *
  * @author Mark Jeronimus
  */
 // Created 2018-02-17
 public final class FilterComponentKanjiFiles {
-	private static final Comparator<ComponentFileEntry> COMPONENT_SORTER =
-			Comparator.comparingInt(ComponentFileEntry::size).reversed()
-			          .thenComparingInt(ComponentFileEntry::getRadical);
-
 	public static void main(String... args) throws IOException {
 		System.setProperty("line.separator", "\n");
 
@@ -71,17 +66,17 @@ public final class FilterComponentKanjiFiles {
 	}
 
 	private static void process(String filenameIn) throws IOException {
-		KanjiList                      kanjiInSet = KanjiSetFileIO.read(filenameIn);
-		Collection<ComponentFileEntry> components = RadKFileIO.read("componentsets/radkfilex", "EUC-JP");
+		KanjiList                   kanjiSet       = KanjiSetFileIO.read(filenameIn);
+		Collection<TaggedKanjiList> componentLists = RadKFileIO.read("componentsets/radkfilex", "EUC-JP");
 
-		components.forEach(component -> component.retainAll(kanjiInSet));
+		componentLists.forEach(componentList -> componentList.retainAll(kanjiSet));
 
-		makeComponentFrequencyFile(filenameIn, components);
-		// This one last because it modifies 'components'.
-		makeComponentsFile(filenameIn, components);
+		makeComponentFrequencyFile(filenameIn, componentLists);
+		// This one last because it modifies 'componentLists'.
+		makeComponentsFile(filenameIn, componentLists);
 	}
 
-	private static void makeComponentsFile(String filenameIn, Collection<ComponentFileEntry> components)
+	private static void makeComponentsFile(String filenameIn, Collection<TaggedKanjiList> components)
 			throws IOException {
 		components.removeIf(KanjiList::isEmpty);
 
@@ -91,13 +86,13 @@ public final class FilterComponentKanjiFiles {
 		System.out.println(filenameIn + " -> " + filenameOut);
 	}
 
-	private static void makeComponentFrequencyFile(String filenameIn, Collection<ComponentFileEntry> components)
+	private static void makeComponentFrequencyFile(String filenameIn, Collection<TaggedKanjiList> componentLists)
 			throws IOException {
 		AtomicInteger index     = new AtomicInteger();
 		String        firstLine = "ComponentID\tComponent\tCount";
 		List<String> lines = Stream.concat(Stream.of(firstLine),
-		                                   components.stream()
-		                                             .map(entry -> toFrequencyString(entry, index)))
+		                                   componentLists.stream()
+		                                                 .map(entry -> toFrequencyString(entry, index)))
 		                           .collect(Collectors.toList());
 
 		String filenameOut = makeFilename(filenameIn, "component-frequencies-per-set", "-component-frequencies.tsv");
@@ -106,13 +101,13 @@ public final class FilterComponentKanjiFiles {
 		System.out.println(filenameIn + " -> " + filenameOut);
 	}
 
-	private static String toFrequencyString(ComponentFileEntry entry, AtomicInteger index) {
+	private static String toFrequencyString(TaggedKanjiList entry, AtomicInteger index) {
 		return index.incrementAndGet() + "\t" +
-		       entry.getRadicalAsString() + '\t' +
+		       entry.getComponentAsString() + '\t' +
 		       Integer.toString(entry.size());
 	}
 
-	private static String makeFilename(String filenameIn, String directory, CharSequence suffix) {
+	private static String makeFilename(String filenameIn, CharSequence directory, CharSequence suffix) {
 		//noinspection DynamicRegexReplaceableByCompiledPattern // Suppress IntelliJ Bug (this is not a regex)
 		return filenameIn.replace("kanjisets", directory)
 		                 .replace("-set.utf8", suffix);

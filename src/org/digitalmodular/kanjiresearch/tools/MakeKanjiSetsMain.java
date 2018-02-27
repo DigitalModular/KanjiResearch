@@ -31,10 +31,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.digitalmodular.kanjiresearch.util.ComponentFileEntry;
 import org.digitalmodular.kanjiresearch.util.KanjiList;
 import org.digitalmodular.kanjiresearch.util.KanjiSetFileIO;
 import org.digitalmodular.kanjiresearch.util.RadKFileIO;
+import org.digitalmodular.kanjiresearch.util.TaggedKanjiList;
 
 /**
  * Extracts unique kanji from various sources.
@@ -56,16 +56,16 @@ public final class MakeKanjiSetsMain {
 	}
 
 	private static void fromRadKFile(String filenameIn, String filenameOut) throws IOException {
-		List<ComponentFileEntry> componentKanji = RadKFileIO.read(filenameIn, "EUC-JP");
+		List<TaggedKanjiList> componentKanji = RadKFileIO.read(filenameIn, "EUC-JP");
 
-		KanjiList uniqueKanji = convert(componentKanji);
-		KanjiSetFileIO.write(uniqueKanji, filenameOut);
+		KanjiList kanjiSet = convert(componentKanji);
+		KanjiSetFileIO.write(kanjiSet, filenameOut);
 
 		System.out.println(filenameIn + " -> " + filenameOut);
 	}
 
-	private static KanjiList convert(Collection<ComponentFileEntry> componentKanji) {
-		return componentKanji.stream()
+	private static KanjiList convert(Collection<TaggedKanjiList> componentLists) {
+		return componentLists.stream()
 		                     .map(KanjiList::toArray)
 		                     .flatMapToInt(Arrays::stream)
 		                     .distinct()
