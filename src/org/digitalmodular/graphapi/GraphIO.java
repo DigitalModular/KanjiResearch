@@ -148,22 +148,22 @@ public final class GraphIO {
 			throw new IOException("Size is not an integer: \"" + lines.get(0) + '"');
 		}
 
-		Graph   graph   = new NeighborGraph(numNodes);
-		boolean started = false;
+		Graph graph = new NeighborGraph(numNodes);
 		for (int i = 1; i < lines.size(); i++) {
 			String line = lines.get(i);
 
 			int x;
 			int y;
 			try {
-				int separator = line.indexOf(' ', 1);
+				int separator = line.indexOf('\t', 1);
+				if (separator < 0)
+					continue;
+
 				x = Integer.parseInt(lines.get(i).substring(0, separator).trim());
 				y = Integer.parseInt(lines.get(i).substring(separator + 1).trim());
 			} catch (NumberFormatException ignored) {
-				if (started)
-					throw new IOException("Cannot parse connection: " + filename +
-					                      " @ line " + (i + 1));
-				continue;
+				throw new IOException("Cannot parse connection: " + filename +
+				                      " @ line " + (i + 1));
 			}
 
 			if (x == y)
@@ -177,7 +177,6 @@ public final class GraphIO {
 				                      " @ line " + (i + 1));
 
 			graph.setConnection(x, y);
-			started = true;
 		}
 
 		return graph;
@@ -206,7 +205,7 @@ public final class GraphIO {
 				int   y          = connection[1];
 				assert x < y;
 				out.write(String.valueOf(x));
-				out.write(' ');
+				out.write('\t');
 				out.write(String.valueOf(y));
 				out.newLine();
 			}
