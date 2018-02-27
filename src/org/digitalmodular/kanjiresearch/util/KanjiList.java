@@ -31,6 +31,10 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * List of kanji, sorted by Unicode code point. (So it's actually more like a Set, but indexable.)
+ * <p>
+ * Can also contain other characters than kanji, so check what you're adding.
+ *
  * @author Mark Jeronimus
  */
 // Created 2018-02-17
@@ -46,9 +50,6 @@ public class KanjiList {
 
 	public void add(Integer codePoint) {
 		int i = Collections.binarySearch(kanji, codePoint);
-
-		// Workaround for bug in kradfile: some kanji have a radical listed more than once, hence in radkfile some
-		// kanji are listed multiple times the same radical. (e.g. 場)
 		if (i >= 0)
 			return;
 
@@ -59,6 +60,8 @@ public class KanjiList {
 		for (Integer e : codePoints)
 			add(e);
 	}
+
+	public void addAll(KanjiList other)    { addAll(other.kanji); }
 
 	public int size()                      { return kanji.size(); }
 
