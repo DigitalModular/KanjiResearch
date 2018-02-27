@@ -119,7 +119,7 @@ public class NeighborGraph implements Graph {
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder(numNodes() * GraphUtilities.countNumConnections(this) * 4);
+		StringBuilder sb = new StringBuilder(numNodes() * GraphUtilities.countConnections(this) * 4);
 
 		for (int y = 0; y < neighbors.size(); y++) {
 			if (y > 0)

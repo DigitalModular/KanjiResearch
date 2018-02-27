@@ -49,6 +49,6 @@ public final class GraphWeightCalculator implements GlobalGraphStatisticCalculat
 	public double calculate(Graph graph) {
 		requireNonNull(graph);
 
-		return GraphUtilities.countNumConnections(graph);
+		return GraphUtilities.countConnections(graph);
 	}
 }

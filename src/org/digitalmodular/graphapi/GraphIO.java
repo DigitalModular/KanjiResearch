@@ -38,7 +38,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
 import javax.imageio.ImageIO;
 
 /**
@@ -185,7 +184,7 @@ public final class GraphIO {
 	}
 
 	private static void writeCONN(Graph graph, String filename) throws IOException {
-		Iterator<Entry<Integer, Integer>> iterator = graph.iterator();
+		Iterator<int[]> iterator = graph.iterator();
 
 		try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename),
 		                                                                    StandardCharsets.US_ASCII))) {
@@ -194,18 +193,21 @@ public final class GraphIO {
 			out.newLine();
 
 			out.write("Number of isolated nodes: ");
-			out.write(String.valueOf(GraphUtilities.countNumIsolatedNodes(graph)));
+			out.write(String.valueOf(GraphUtilities.countIsolatedNodes(graph)));
 			out.newLine();
 
 			out.write("Number of leaf nodes: ");
-			out.write(String.valueOf(GraphUtilities.countNumLeafNodes(graph)));
+			out.write(String.valueOf(GraphUtilities.countLeafNodes(graph)));
 			out.newLine();
 
 			while (iterator.hasNext()) {
-				Entry<Integer, Integer> connection = iterator.next();
-				out.write(String.valueOf(connection.getKey()));
+				int[] connection = iterator.next();
+				int   x          = connection[0];
+				int   y          = connection[1];
+				assert x < y;
+				out.write(String.valueOf(x));
 				out.write(' ');
-				out.write(String.valueOf(connection.getValue()));
+				out.write(String.valueOf(y));
 				out.newLine();
 			}
 		}

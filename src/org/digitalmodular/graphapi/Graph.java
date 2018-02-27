@@ -27,16 +27,14 @@
 package org.digitalmodular.graphapi;
 
 import java.io.Serializable;
-import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Iterator;
-import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 
 /**
  * @author Mark Jeronimus
  */
 // Created 2018-02-04
-public interface Graph extends Serializable, Iterable<Entry<Integer, Integer>> {
+public interface Graph extends Serializable, Iterable<int[]> {
 	int numNodes();
 
 	void setConnection(int x, int y);
@@ -48,13 +46,13 @@ public interface Graph extends Serializable, Iterable<Entry<Integer, Integer>> {
 	void setGraph(Graph other);
 
 	/**
-	 * Constructs an iterator that iterates over all connections. The only guarantee is that the index of the first
-	 * node is never higher than the index of the second node.
+	 * Constructs an iterator that iterates over all connections. The only guarantee is that the first index is never
+	 * higher than the second index.
 	 */
 	@Override
-	default Iterator<Entry<Integer, Integer>> iterator() {
+	default Iterator<int[]> iterator() {
 		//noinspection AnonymousInnerClassWithTooManyMethods,OverlyComplexAnonymousInnerClass // Suppress intelliJ bug
-		return new Iterator<Entry<Integer, Integer>>() {
+		return new Iterator<int[]>() {
 			private int y = 0;
 			private int x = 0;
 
@@ -68,11 +66,11 @@ public interface Graph extends Serializable, Iterable<Entry<Integer, Integer>> {
 			}
 
 			@Override
-			public Entry<Integer, Integer> next() {
+			public int[] next() {
 				if (!hasNext())
 					throw new NoSuchElementException("");
 
-				Entry<Integer, Integer> connection = new SimpleImmutableEntry<>(y, x);
+				int[] connection = {x, y};
 				findNext();
 				return connection;
 			}

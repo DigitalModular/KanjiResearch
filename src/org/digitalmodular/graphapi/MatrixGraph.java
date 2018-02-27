@@ -26,7 +26,6 @@
  */
 package org.digitalmodular.graphapi;
 
-import java.util.Map.Entry;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -85,8 +84,8 @@ public class MatrixGraph implements Graph {
 		if (other instanceof MatrixGraph)
 			setMatrixGraph((MatrixGraph)other);
 		else
-			for (Entry<Integer, Integer> connections1 : other)
-				setConnection(connections1.getKey(), connections1.getValue());
+			for (int[] connections : other)
+				setConnection(connections[0], connections[1]);
 	}
 
 	private void setMatrixGraph(MatrixGraph other) {

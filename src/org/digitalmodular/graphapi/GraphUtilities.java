@@ -33,7 +33,21 @@ package org.digitalmodular.graphapi;
 public final class GraphUtilities {
 	private GraphUtilities() { throw new AssertionError(); }
 
-	public static int countNumConnections(Graph graph) {
+	public static MatrixGraph toMatrixGraph(Graph graph) {
+		if (graph instanceof MatrixGraph)
+			return (MatrixGraph)graph;
+
+		return new MatrixGraph(graph);
+	}
+
+	public static NeighborGraph toNeighborGraph(Graph graph) {
+		if (graph instanceof NeighborGraph)
+			return (NeighborGraph)graph;
+
+		return new NeighborGraph(graph);
+	}
+
+	public static int countConnections(Graph graph) {
 		int numNodes       = graph.numNodes();
 		int numConnections = 0;
 		for (int y = 0; y < numNodes; y++)
@@ -44,7 +58,7 @@ public final class GraphUtilities {
 		return numConnections;
 	}
 
-	public static int countNumIsolatedNodes(Graph graph) {
+	public static int countIsolatedNodes(Graph graph) {
 		int numNodes         = graph.numNodes();
 		int numIsolatedNodes = 0;
 		for (int y = 0; y < numNodes; y++) {
@@ -60,7 +74,7 @@ public final class GraphUtilities {
 		return numIsolatedNodes;
 	}
 
-	public static int countNumLeafNodes(Graph graph) {
+	public static int countLeafNodes(Graph graph) {
 		int numNodes     = graph.numNodes();
 		int numLeafNodes = 0;
 		for (int y = 0; y < numNodes; y++) {
