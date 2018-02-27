@@ -78,8 +78,6 @@ public final class FilterComponentKanjiFiles {
 
 	private static void makeComponentsFile(String filenameIn, Collection<TaggedKanjiList> components)
 			throws IOException {
-		components.removeIf(KanjiList::isEmpty);
-
 		String filenameOut = makeFilename(filenameIn, "components-filtered-per-set", "-components.utf8");
 		ComponentFileIO.write(components, filenameOut);
 
