@@ -32,10 +32,6 @@ import static java.util.Objects.requireNonNull;
 import org.digitalmodular.graphapi.NeighborGraph;
 
 /**
- * Directly returns the number of nodes in the graph.
- * <p>
- * This class is not thread-safe.
- *
  * @author Mark Jeronimus
  */
 // Created 2018-02-04
@@ -71,6 +67,12 @@ public class SpreadingSpeedCalculator implements LocalGraphStatisticCalculator<N
 		this.targetValue = targetValue;
 		this.finishFactor = finishFactor;
 	}
+
+	@Override
+	public String getName() { return "Spreading Speed"; }
+
+	@Override
+	public String getAbbreviation() { return "SS"; }
 
 	@Override
 	public double[] calculateAll(NeighborGraph graph) {

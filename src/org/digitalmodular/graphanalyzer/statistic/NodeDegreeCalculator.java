@@ -30,32 +30,33 @@ import static java.util.Objects.requireNonNull;
 
 import org.digitalmodular.graphapi.NeighborGraph;
 
-import static sun.management.snmp.jvminstr.JvmThreadInstanceEntryImpl.ThreadStateMap.Byte1.other;
-
 /**
- * Returns the number of neighbors of the nodes.
- *
  * @author Mark Jeronimus
  */
 // Created 2018-02-04
-public final class GraphNeighborhoodCalculator implements LocalGraphStatisticCalculator<NeighborGraph> {
-	public static final GraphNeighborhoodCalculator INSTANCE = new GraphNeighborhoodCalculator();
+public final class NodeDegreeCalculator implements LocalGraphStatisticCalculator<NeighborGraph> {
+	public static final NodeDegreeCalculator INSTANCE = new NodeDegreeCalculator();
 
-	private GraphNeighborhoodCalculator() {
+	private NodeDegreeCalculator() {
 		if (INSTANCE != null)
 			throw new AssertionError();
 	}
 
 	@Override
+	public String getName() { return "Node degree"; }
+
+	@Override
+	public String getAbbreviation() { return "ND"; }
+
+	@Override
 	public double[] calculateAll(NeighborGraph graph) {
-		requireNonNull(other);
+		requireNonNull(graph);
 
-		int numNodes = graph.numNodes();
+		int      numNodes     = graph.numNodes();
+		double[] numNeighbors = new double[numNodes];
+		for (int node = 0; node < numNodes; node++)
+			numNeighbors[node] = graph.numNeighbors(node);
 
-		double[] clusteringCoefficients = new double[numNodes];
-		for (int i = 0; i < numNodes; i++)
-			clusteringCoefficients[i] = graph.numNeighbors(i);
-
-		return clusteringCoefficients;
+		return numNeighbors;
 	}
 }

@@ -47,6 +47,12 @@ public final class WattsStrogatzClusteringCoefficientCalculator
 	}
 
 	@Override
+	public String getName() { return "Clustering Coefficient"; }
+
+	@Override
+	public String getAbbreviation() { return "CC"; }
+
+	@Override
 	public double[] calculateAll(NeighborGraph graph) {
 		requireNonNull(graph);
 

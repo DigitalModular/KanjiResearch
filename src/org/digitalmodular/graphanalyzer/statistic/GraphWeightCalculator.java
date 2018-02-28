@@ -46,6 +46,12 @@ public final class GraphWeightCalculator implements GlobalGraphStatisticCalculat
 	}
 
 	@Override
+	public String getName() { return "Graph weight (number of connections)"; }
+
+	@Override
+	public String getAbbreviation() { return "GW"; }
+
+	@Override
 	public double calculate(Graph graph) {
 		requireNonNull(graph);
 

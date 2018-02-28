@@ -45,6 +45,12 @@ public final class GraphSizeCalculator implements GlobalGraphStatisticCalculator
 	}
 
 	@Override
+	public String getName() { return "Graph size (number of nodes)"; }
+
+	@Override
+	public String getAbbreviation() { return "GS"; }
+
+	@Override
 	public double calculate(NeighborGraph graph) {
 		requireNonNull(graph);
 

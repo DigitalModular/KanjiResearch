@@ -46,6 +46,12 @@ public final class BansalClusteringCoefficientCalculator implements LocalGraphSt
 	}
 
 	@Override
+	public String getName() { return "Clustering Coefficient"; }
+
+	@Override
+	public String getAbbreviation() { return "CC"; }
+
+	@Override
 	public double calculate(NeighborGraph graph) {
 		return networkAverage(calculateAll(graph), true);
 	}

@@ -33,5 +33,9 @@ import org.digitalmodular.graphapi.Graph;
  */
 // Created 2018-02-11
 public interface GlobalGraphStatisticCalculator<G extends Graph> {
+	String getName();
+
+	String getAbbreviation();
+
 	double calculate(G graph);
 }

@@ -46,6 +46,12 @@ public final class AveragePathLengthCalculator implements LocalGraphStatisticCal
 	}
 
 	@Override
+	public String getName() { return "Average Path Length"; }
+
+	@Override
+	public String getAbbreviation() { return "APL"; }
+
+	@Override
 	public double[] calculateAll(NeighborGraph graph) {
 		int numNodes = graph.numNodes();
 

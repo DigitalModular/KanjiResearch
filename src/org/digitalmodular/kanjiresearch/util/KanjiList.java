@@ -73,6 +73,8 @@ public class KanjiList {
 
 	public int indexOf(Integer codePoint)  { return Collections.binarySearch(kanji, codePoint); }
 
+	public String getAsString(int index)   { return new String(new int[]{kanji.get(index)}, 0, 1); }
+
 	public int[] toArray() {
 		return kanji.stream()
 		            .mapToInt(Integer::intValue)
