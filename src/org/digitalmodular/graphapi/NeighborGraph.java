@@ -27,7 +27,6 @@
 package org.digitalmodular.graphapi;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Objects.requireNonNull;
@@ -84,7 +83,7 @@ public class NeighborGraph implements Graph {
 	@Override
 	public boolean isConnected(int x, int y) {
 		List<Integer> neighborsOfNode = neighbors.get(y);
-		return Collections.binarySearch(neighborsOfNode, x) >= 0;
+		return binarySearch(neighborsOfNode, x) >= 0;
 	}
 
 	@Override
@@ -107,7 +106,7 @@ public class NeighborGraph implements Graph {
 	public int getNeighbor(int node, int index) { return neighbors.get(node).get(index); }
 
 	private static void addNeighbor(List<Integer> neighborsOfNode, int newNeighbor) {
-		int insertionPoint = Collections.binarySearch(neighborsOfNode, newNeighbor);
+		int insertionPoint = binarySearch(neighborsOfNode, newNeighbor);
 		assert insertionPoint < 0;
 		neighborsOfNode.add(-insertionPoint - 1, newNeighbor);
 	}
@@ -131,5 +130,24 @@ public class NeighborGraph implements Graph {
 				sb.append(' ').append(x);
 		}
 		return sb.toString();
+	}
+
+	// Modified from Collections.binarySearch()
+	private static int binarySearch(List<Integer> list, int key) {
+		int low  = 0;
+		int high = list.size() - 1;
+
+		while (low <= high) {
+			int mid    = (low + high) >>> 1;
+			int midVal = list.get(mid);
+
+			if (midVal < key)
+				low = mid + 1;
+			else if (midVal > key)
+				high = mid - 1;
+			else
+				return mid;
+		}
+		return -(low + 1);
 	}
 }
