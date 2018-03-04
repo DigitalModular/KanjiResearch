@@ -38,13 +38,15 @@ import static java.util.Objects.requireNonNull;
  * @author Mark Jeronimus
  */
 // Created 2018-02-10
-public class NeighborGraph implements Graph {
+public class NeighborGraph extends MatrixGraph {
 	private static final long serialVersionUID = -5755588310875985669L;
 
 	private final int[]   numNeighbors;
 	private final int[][] neighbors;
 
 	public NeighborGraph(int size) {
+		super(size);
+
 		numNeighbors = new int[size];
 		neighbors = new int[size][size - 1];
 	}
@@ -57,14 +59,11 @@ public class NeighborGraph implements Graph {
 	}
 
 	@Override
-	public int size() {
-		return neighbors.length;
-	}
-
-	@Override
 	public void setConnection(int x, int y) {
 		if (isConnected(x, y) || x == y)
 			return;
+
+		super.setConnection(x, y);
 
 		addNeighbor(x, y);
 		addNeighbor(y, x);
@@ -75,16 +74,10 @@ public class NeighborGraph implements Graph {
 		if (!isConnected(x, y) || x == y)
 			return;
 
+		super.removeConnection(x, y);
+
 		removeNeighbor(x, y);
 		removeNeighbor(y, x);
-	}
-
-	@Override
-	public boolean isConnected(int x, int y) {
-		if (numNeighbors[x] < numNeighbors[y])
-			return binarySearch(neighbors[x], 0, numNeighbors[x], y) >= 0;
-		else
-			return binarySearch(neighbors[y], 0, numNeighbors[y], x) >= 0;
 	}
 
 	@Override
@@ -95,9 +88,10 @@ public class NeighborGraph implements Graph {
 			throw new IllegalArgumentException("Network sizes differ: " + size + " vs " + other.size());
 
 		if (other instanceof NeighborGraph) {
-			System.arraycopy(((NeighborGraph)other).numNeighbors, 0, numNeighbors, 0, size);
+			NeighborGraph neighborGraph = (NeighborGraph)other;
+			System.arraycopy(neighborGraph.numNeighbors, 0, numNeighbors, 0, size);
 			for (int i = 0; i < size; i++)
-				System.arraycopy(((NeighborGraph)other).neighbors[i], 0, neighbors[i], 0, numNeighbors[i]);
+				System.arraycopy(neighborGraph.neighbors[i], 0, neighbors[i], 0, numNeighbors[i]);
 		} else {
 			Arrays.fill(numNeighbors, 0);
 
@@ -149,7 +143,7 @@ public class NeighborGraph implements Graph {
 
 			sb.append(node).append(' ');
 			for (int i = 0; i < numNeighbors[node]; i++)
-				sb.append(' ').append(this.neighbors[node][i]);
+				sb.append(' ').append(neighbors[node][i]);
 		}
 		return sb.toString();
 	}
