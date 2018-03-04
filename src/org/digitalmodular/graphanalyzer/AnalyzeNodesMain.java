@@ -53,25 +53,25 @@ public final class AnalyzeNodesMain {
 	private static final AveragePathLengthCalculator           APL = AveragePathLengthCalculator.INSTANCE;
 	private static final SpreadingSpeedCalculator              SS  = new SpreadingSpeedCalculator(1, 1, 1, 1);
 
-	public static void main(String... args) throws IOException {
+	public static void main(String... args) throws IOException, InterruptedException {
 		String[] filenames = Files.list(Paths.get("kanjigraphs"))
-//		                          .filter(path -> { // Large networks are a memory problem, need to figure out why.
+//		                          .filter(path -> {
 //			                          try {
-//				                          return Files.size(path) < 3000000;
+//				                          return Files.size(path) > 10_000_000;
 //			                          } catch (IOException ignored) {
 //				                          return false;
 //			                          }
 //		                          })
-                                  .sorted(Comparator.comparingLong(path -> {
-	                                  try {
-		                                  return Files.size(path);
-	                                  } catch (IOException ignored) {
-		                                  return Long.MAX_VALUE;
-	                                  }
-                                  }))
-                                  .map(Path::toString)
-                                  .filter(filename -> filename.endsWith("-graph.conn"))
-                                  .toArray(String[]::new);
+		                          .sorted(Comparator.comparingLong(path -> {
+			                          try {
+				                          return Files.size(path);
+			                          } catch (IOException ignored) {
+				                          return Long.MAX_VALUE;
+			                          }
+		                          }))
+		                          .map(Path::toString)
+		                          .filter(filename -> filename.endsWith("-graph.conn"))
+		                          .toArray(String[]::new);
 
 		for (String filename : filenames)
 			analyze(filename);
