@@ -31,7 +31,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
+import java.util.Comparator;
 
 import org.digitalmodular.graphanalyzer.statistic.AveragePathLengthCalculator;
 import org.digitalmodular.graphanalyzer.statistic.BansalClusteringCoefficientCalculator;
@@ -40,13 +40,13 @@ import org.digitalmodular.graphanalyzer.statistic.SpreadingSpeedCalculator;
 import org.digitalmodular.graphapi.GraphIO;
 import org.digitalmodular.graphapi.GraphUtilities;
 import org.digitalmodular.graphapi.NeighborGraph;
-import org.digitalmodular.kanjiresearch.util.KanjiList;
-import org.digitalmodular.kanjiresearch.util.KanjiSetFileIO;
+import org.digitalmodular.graphapi.SubGraphSplitter;
 
 /**
  * @author Mark Jeronimus
  */
 // Created 2018-02-28
+@SuppressWarnings("UseOfSystemOutOrSystemErr")
 public final class AnalyzeNodesMain {
 	private static final NodeDegreeCalculator                  ND  = NodeDegreeCalculator.INSTANCE;
 	private static final BansalClusteringCoefficientCalculator CC  = BansalClusteringCoefficientCalculator.INSTANCE;
@@ -55,41 +55,54 @@ public final class AnalyzeNodesMain {
 
 	public static void main(String... args) throws IOException {
 		String[] filenames = Files.list(Paths.get("kanjigraphs"))
-		                          .filter(path -> { // Large networks are a memory problem, need to figure out why.
-			                          try {
-				                          return Files.size(path) < 3000000;
-			                          } catch (IOException ignored) {
-				                          return false;
-			                          }
-		                          })
-		                          .map(Path::toString)
-		                          .filter(filename -> filename.endsWith("-graph.conn"))
-		                          .toArray(String[]::new);
+//		                          .filter(path -> { // Large networks are a memory problem, need to figure out why.
+//			                          try {
+//				                          return Files.size(path) < 3000000;
+//			                          } catch (IOException ignored) {
+//				                          return false;
+//			                          }
+//		                          })
+                                  .sorted(Comparator.comparingLong(path -> {
+	                                  try {
+		                                  return Files.size(path);
+	                                  } catch (IOException ignored) {
+		                                  return Long.MAX_VALUE;
+	                                  }
+                                  }))
+                                  .map(Path::toString)
+                                  .filter(filename -> filename.endsWith("-graph.conn"))
+                                  .toArray(String[]::new);
 
 		for (String filename : filenames)
 			analyze(filename);
 	}
 
 	private static void analyze(String filenameIn) throws IOException {
-		NeighborGraph graph    = GraphUtilities.toNeighborGraph(GraphIO.read(filenameIn));
-		KanjiList     kanjiSet = KanjiSetFileIO.read(makeFilename(filenameIn, "kanjisets", "-set.utf8"));
+		Benchmark.start();
+		NeighborGraph graph = GraphUtilities.toNeighborGraph(GraphIO.read(filenameIn));
+		Benchmark.record("load");
 
-		int n = graph.size();
-		assert kanjiSet.size() == n : filenameIn + ' ' + kanjiSet.size() + ' ' + n;
+		graph = SubGraphSplitter.splitGraph(graph).get(0);
+		int size = graph.size();
+		Benchmark.record("subGraph");
 
-		double[] nd  = ND.calculateAll(graph);
-		double[] cc  = CC.calculateAll(graph);
-		double[] apl = n < 3000 ? nanArray(n) : APL.calculateAll(graph);
-		double[] ss  = n < 3000 ? nanArray(n) : SS.calculateAll(graph);
+		double[] nd = ND.calculateAll(graph);
+		Benchmark.record("ND");
+		double[] cc = CC.calculateAll(graph);
+		Benchmark.record("CC");
+		double[] apl = APL.calculateAll(graph);
+		Benchmark.record("APL");
+		double[] ss = SS.calculateAll(graph);
+		Benchmark.record("SS");
+		Benchmark.printResults(size);
 
 		String filenameOut = makeFilename(filenameIn, "graphstatistics", "-statistics.tsv");
 		try (BufferedWriter out = Files.newBufferedWriter(Paths.get(filenameOut))) {
-			out.write("i\tKanji\tDegree\tInterconnections\tCC\tAPL\tSS\n");
+			out.write("i\tDegree\tInterconnections\tCC\tAPL\tSS\n");
 
-			for (int i = 0; i < n; i++) {
+			for (int i = 0; i < size; i++) {
 				int ic = (int)Math.rint(nd[i] * (nd[i] - 1) / 2 * cc[i]);
-				out.write(String.format("%d\t%s\t%d\t%d\t%7.5f\t%7.5f\t%7.5f\n",
-				                        i, kanjiSet.getAsString(i),
+				out.write(String.format("%d\t%d\t%d\t%7.5f\t%7.5f\t%7.5f\n", i,
 				                        (int)nd[i], ic, cc[i], apl[i], ss[i]));
 			}
 
@@ -101,11 +114,5 @@ public final class AnalyzeNodesMain {
 		//noinspection DynamicRegexReplaceableByCompiledPattern // Suppress IntelliJ Bug (this is not a regex)
 		return filenameIn.replace("kanjigraphs", directory)
 		                 .replace("-graph.conn", suffix);
-	}
-
-	private static double[] nanArray(int n) {
-		double[] nan = new double[n];
-		Arrays.fill(nan, Double.NaN);
-		return nan;
 	}
 }
