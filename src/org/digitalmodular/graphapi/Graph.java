@@ -50,9 +50,9 @@ public interface Graph extends Serializable, Iterable<int[]> {
 	 * higher than the second index.
 	 */
 	@Override
-	default Iterator<int[]> iterator() {
-		//noinspection AnonymousInnerClassWithTooManyMethods,OverlyComplexAnonymousInnerClass // Suppress intelliJ bug
-		return new Iterator<int[]>() {
+	default ConnectionIterator iterator() {
+		//noinspection AnonymousInnerClassWithTooManyMethods,OverlyComplexAnonymousInnerClass
+		return new ConnectionIterator() {
 			private int y = 0;
 			private int x = 0;
 
@@ -67,12 +67,19 @@ public interface Graph extends Serializable, Iterable<int[]> {
 
 			@Override
 			public int[] next() {
+				int[] connection = new int[2];
+				next(connection);
+				return connection;
+			}
+
+			@Override
+			public void next(int[] connection) {
 				if (!hasNext())
 					throw new NoSuchElementException("");
 
-				int[] connection = {x, y};
+				connection[0] = x;
+				connection[1] = y;
 				findNext();
-				return connection;
 			}
 
 			private void findNext() {
@@ -91,5 +98,12 @@ public interface Graph extends Serializable, Iterable<int[]> {
 				}
 			}
 		};
+	}
+
+	interface ConnectionIterator extends Iterator<int[]> {
+		/**
+		 * @param connection recyclable array of length 2.
+		 */
+		void next(int[] connection);
 	}
 }

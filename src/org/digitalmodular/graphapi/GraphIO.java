@@ -36,9 +36,10 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Iterator;
 import java.util.List;
 import javax.imageio.ImageIO;
+
+import org.digitalmodular.graphapi.Graph.ConnectionIterator;
 
 /**
  * @author Mark Jeronimus
@@ -183,7 +184,7 @@ public final class GraphIO {
 	}
 
 	private static void writeCONN(Graph graph, String filename) throws IOException {
-		Iterator<int[]> iterator = graph.iterator();
+		ConnectionIterator iterator = graph.iterator();
 
 		try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename),
 		                                                                    StandardCharsets.US_ASCII))) {
@@ -199,10 +200,11 @@ public final class GraphIO {
 			out.write(String.valueOf(GraphUtilities.countLeafNodes(graph)));
 			out.newLine();
 
+			int[] connection = new int[2];
 			while (iterator.hasNext()) {
-				int[] connection = iterator.next();
-				int   x          = connection[0];
-				int   y          = connection[1];
+				iterator.next(connection);
+				int x = connection[0];
+				int y = connection[1];
 				assert x < y;
 				out.write(String.valueOf(x));
 				out.write('\t');
