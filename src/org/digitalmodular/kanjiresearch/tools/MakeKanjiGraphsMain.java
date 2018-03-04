@@ -74,7 +74,7 @@ public final class MakeKanjiGraphsMain {
 
 		write(graph, filenameIn, "-graph.txt");
 		write(graph, filenameIn, "-graph.conn");
-		if (graph.numNodes() < 3000)
+		if (graph.size() < 3000)
 			write(graph, filenameIn, "-graph.png");
 	}
 

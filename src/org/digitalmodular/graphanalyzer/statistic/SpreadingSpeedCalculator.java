@@ -78,24 +78,24 @@ public class SpreadingSpeedCalculator implements LocalGraphStatisticCalculator<N
 	public double[] calculateAll(NeighborGraph graph) {
 		requireNonNull(graph);
 
-		int numNodes = graph.numNodes();
+		int size = graph.size();
 
-		double[] spreadingTime = new double[numNodes];
-		for (int node = 0; node < numNodes; node++)
+		double[] spreadingTime = new double[size];
+		for (int node = 0; node < size; node++)
 			spreadingTime[node] = calculate(graph, node);
 
 		return spreadingTime;
 	}
 
 	public double calculate(NeighborGraph graph, int node) {
-		int numNodes = graph.numNodes();
+		int size = graph.size();
 
-		double[]  valuesOfLastIteration  = new double[numNodes];
-		double[]  values                 = new double[numNodes];
-		boolean[] sendersOfLastIteration = new boolean[numNodes];
-		boolean[] senders                = new boolean[numNodes];
-		boolean[] receivers              = new boolean[numNodes];
-		boolean[] hasMessage             = new boolean[numNodes];
+		double[]  valuesOfLastIteration  = new double[size];
+		double[]  values                 = new double[size];
+		boolean[] sendersOfLastIteration = new boolean[size];
+		boolean[] senders                = new boolean[size];
+		boolean[] receivers              = new boolean[size];
+		boolean[] hasMessage             = new boolean[size];
 
 		Arrays.fill(receivers, true);
 
@@ -104,22 +104,22 @@ public class SpreadingSpeedCalculator implements LocalGraphStatisticCalculator<N
 		receivers[node] = seedValue < 1;
 		hasMessage[node] = seedValue >= targetValue;
 
-		int remaining = (int)StrictMath.ceil(finishFactor * numNodes);
+		int remaining = (int)StrictMath.ceil(finishFactor * size);
 		if (hasMessage[node])
 			remaining--;
 
 		if (remaining == 0)
 			return 0;
 
-		int limit = numNodes * (numNodes - 1) / 2;
+		int limit = size * (size - 1) / 2;
 		for (int step = 1; step < limit; step++) {
-			System.arraycopy(values, 0, valuesOfLastIteration, 0, numNodes);
-			System.arraycopy(senders, 0, sendersOfLastIteration, 0, numNodes);
+			System.arraycopy(values, 0, valuesOfLastIteration, 0, size);
+			System.arraycopy(senders, 0, sendersOfLastIteration, 0, size);
 
 			boolean changed = false;
 
 			// Find nodes that send.
-			for (int sendingNode = 0; sendingNode < numNodes; sendingNode++) {
+			for (int sendingNode = 0; sendingNode < size; sendingNode++) {
 				if (!sendersOfLastIteration[sendingNode])
 					continue;
 

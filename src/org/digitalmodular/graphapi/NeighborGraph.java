@@ -42,23 +42,23 @@ public class NeighborGraph implements Graph {
 
 	private final List<List<Integer>> neighbors;
 
-	public NeighborGraph(int numNodes) {
-		List<List<Integer>> neighbors = new ArrayList<>(numNodes);
-		for (int y = 0; y < numNodes; y++)
-			neighbors.add(new ArrayList<>(numNodes - 1));
+	public NeighborGraph(int size) {
+		List<List<Integer>> neighbors = new ArrayList<>(size);
+		for (int y = 0; y < size; y++)
+			neighbors.add(new ArrayList<>(size - 1));
 
 		this.neighbors = unmodifiableList(neighbors);
 	}
 
 	public NeighborGraph(Graph other) {
-		this(other.numNodes());
+		this(other.size());
 
 		//noinspection OverridableMethodCallDuringObjectConstruction,OverriddenMethodCallDuringObjectConstruction
 		setGraph(other);
 	}
 
 	@Override
-	public int numNodes() {
+	public int size() {
 		return neighbors.size();
 	}
 
@@ -89,13 +89,13 @@ public class NeighborGraph implements Graph {
 	@Override
 	public void setGraph(Graph other) {
 		requireNonNull(other);
-		int numNodes = numNodes();
-		if (numNodes != other.numNodes())
-			throw new IllegalArgumentException("Network sizes differ: " + numNodes + " vs " + other.numNodes());
+		int size = size();
+		if (size != other.size())
+			throw new IllegalArgumentException("Network sizes differ: " + size + " vs " + other.size());
 
-		for (int y = 0; y < numNodes; y++) {
+		for (int y = 0; y < size; y++) {
 			neighbors.get(y).clear();
-			for (int x = 0; x < numNodes; x++)
+			for (int x = 0; x < size; x++)
 				if (x != y && other.isConnected(x, y))
 					neighbors.get(y).add(x);
 		}
@@ -118,7 +118,7 @@ public class NeighborGraph implements Graph {
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder(numNodes() * GraphUtilities.countConnections(this) * 4);
+		StringBuilder sb = new StringBuilder(size() * GraphUtilities.countConnections(this) * 4);
 
 		for (int y = 0; y < neighbors.size(); y++) {
 			if (y > 0)

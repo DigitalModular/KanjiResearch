@@ -48,10 +48,10 @@ public final class GraphUtilities {
 	}
 
 	public static int countConnections(Graph graph) {
-		int numNodes       = graph.numNodes();
+		int size           = graph.size();
 		int numConnections = 0;
-		for (int y = 0; y < numNodes; y++)
-			for (int x = y + 1; x < numNodes; x++)
+		for (int y = 0; y < size; y++)
+			for (int x = y + 1; x < size; x++)
 				if (graph.isConnected(x, y))
 					numConnections++;
 
@@ -59,11 +59,11 @@ public final class GraphUtilities {
 	}
 
 	public static int countIsolatedNodes(Graph graph) {
-		int numNodes         = graph.numNodes();
+		int size             = graph.size();
 		int numIsolatedNodes = 0;
-		for (int y = 0; y < numNodes; y++) {
+		for (int y = 0; y < size; y++) {
 			int numNeighbors = 0;
-			for (int x = 0; x < numNodes; x++)
+			for (int x = 0; x < size; x++)
 				if (x != y && graph.isConnected(x, y))
 					numNeighbors++;
 
@@ -75,11 +75,11 @@ public final class GraphUtilities {
 	}
 
 	public static int countLeafNodes(Graph graph) {
-		int numNodes     = graph.numNodes();
+		int size         = graph.size();
 		int numLeafNodes = 0;
-		for (int y = 0; y < numNodes; y++) {
+		for (int y = 0; y < size; y++) {
 			int numNeighbors = 0;
-			for (int x = 0; x < numNodes; x++)
+			for (int x = 0; x < size; x++)
 				if (x != y && graph.isConnected(x, y))
 					numNeighbors++;
 

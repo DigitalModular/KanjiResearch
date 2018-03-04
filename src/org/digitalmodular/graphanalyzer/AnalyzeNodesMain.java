@@ -74,7 +74,7 @@ public final class AnalyzeNodesMain {
 		NeighborGraph graph    = GraphUtilities.toNeighborGraph(GraphIO.read(filenameIn));
 		KanjiList     kanjiSet = KanjiSetFileIO.read(makeFilename(filenameIn, "kanjisets", "-set.utf8"));
 
-		int n = graph.numNodes();
+		int n = graph.size();
 		assert kanjiSet.size() == n : filenameIn + ' ' + kanjiSet.size() + ' ' + n;
 
 		double[] nd  = ND.calculateAll(graph);

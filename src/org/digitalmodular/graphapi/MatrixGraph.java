@@ -39,22 +39,22 @@ public class MatrixGraph implements Graph {
 
 	private final boolean[][] matrix;
 
-	public MatrixGraph(int numNodes) {
-		if (numNodes < 1)
-			throw new IllegalArgumentException("numNodes should be at least 1: " + numNodes);
+	public MatrixGraph(int size) {
+		if (size < 1)
+			throw new IllegalArgumentException("size should be at least 1: " + size);
 
-		matrix = new boolean[numNodes][numNodes];
+		matrix = new boolean[size][size];
 	}
 
 	public MatrixGraph(Graph other) {
-		this(other.numNodes());
+		this(other.size());
 
 		//noinspection OverridableMethodCallDuringObjectConstruction,OverriddenMethodCallDuringObjectConstruction
 		setGraph(other);
 	}
 
 	@Override
-	public int numNodes() {
+	public int size() {
 		return matrix.length;
 	}
 
@@ -78,8 +78,8 @@ public class MatrixGraph implements Graph {
 	@Override
 	public void setGraph(Graph other) {
 		requireNonNull(other);
-		if (numNodes() != other.numNodes())
-			throw new IllegalArgumentException("Network sizes differ: " + numNodes() + " vs " + other.numNodes());
+		if (size() != other.size())
+			throw new IllegalArgumentException("Network sizes differ: " + size() + " vs " + other.size());
 
 		if (other instanceof MatrixGraph)
 			setMatrixGraph((MatrixGraph)other);
@@ -89,9 +89,9 @@ public class MatrixGraph implements Graph {
 	}
 
 	private void setMatrixGraph(MatrixGraph other) {
-		int numNodes = numNodes();
-		for (int i = 0; i < numNodes; i++)
-			System.arraycopy(other.matrix[i], 0, matrix[i], 0, numNodes);
+		int size = size();
+		for (int i = 0; i < size; i++)
+			System.arraycopy(other.matrix[i], 0, matrix[i], 0, size);
 	}
 
 	@Override

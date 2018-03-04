@@ -53,27 +53,27 @@ public final class AveragePathLengthCalculator implements LocalGraphStatisticCal
 
 	@Override
 	public double[] calculateAll(NeighborGraph graph) {
-		int numNodes = graph.numNodes();
+		int size = graph.size();
 
 		Graph visibilityMap = new MatrixGraph(graph);
 
 		int[] pathLengthSums    = getNeighborCounts(graph);
 		int[] numUnvisitedNodes = initNumUnvisitedNodes(graph);
 
-		boolean visible[] = new boolean[numNodes];
+		boolean visible[] = new boolean[size];
 
 		Graph visibilityMapOfLastIteration = new MatrixGraph(visibilityMap);
-		for (int pathLength = 2; pathLength < numNodes; pathLength++) {
+		for (int pathLength = 2; pathLength < size; pathLength++) {
 			visibilityMapOfLastIteration.setGraph(visibilityMap);
 
 			boolean changed = false;
-			for (int node = 0; node < numNodes - 1; node++) {
+			for (int node = 0; node < size - 1; node++) {
 				if (numUnvisitedNodes[node] == 0)
 					continue;
 
 				bitwiseOrOfRows(graph, visibilityMapOfLastIteration, node, visible);
 
-				for (int node2 = node + 1; node2 < numNodes; node2++) {
+				for (int node2 = node + 1; node2 < size; node2++) {
 					if (visible[node2] && !visibilityMap.isConnected(node, node2)) {
 						visibilityMap.setConnection(node, node2);
 
@@ -89,29 +89,29 @@ public final class AveragePathLengthCalculator implements LocalGraphStatisticCal
 			}
 
 			if (nonzeroCount(numUnvisitedNodes) <= 0)
-				return calculateAveragePathLengths(numNodes, pathLengthSums);
+				return calculateAveragePathLengths(size, pathLengthSums);
 
 			if (!changed)
-				return calculateAveragePathLengths(numNodes, null);
+				return calculateAveragePathLengths(size, null);
 		}
 
 		throw new AssertionError("Iteration overflow");
 	}
 
 	private static int[] getNeighborCounts(NeighborGraph graph) {
-		int   numNodes     = graph.numNodes();
-		int[] numNeighbors = new int[numNodes];
-		for (int node = 0; node < numNodes; node++)
+		int   size         = graph.size();
+		int[] numNeighbors = new int[size];
+		for (int node = 0; node < size; node++)
 			numNeighbors[node] = graph.numNeighbors(node);
 
 		return numNeighbors;
 	}
 
 	private static int[] initNumUnvisitedNodes(NeighborGraph graph) {
-		int   numNodes  = graph.numNodes();
-		int[] remaining = new int[numNodes];
-		for (int node = 0; node < numNodes; node++)
-			remaining[node] = numNodes - 1 - graph.numNeighbors(node);
+		int   size      = graph.size();
+		int[] remaining = new int[size];
+		for (int node = 0; node < size; node++)
+			remaining[node] = size - 1 - graph.numNeighbors(node);
 
 		return remaining;
 	}
@@ -126,11 +126,11 @@ public final class AveragePathLengthCalculator implements LocalGraphStatisticCal
 	}
 
 	private static void bitwiseOrOfRows(Graph graph, Graph visibilityMapOfLastIteration, int node, boolean[] visible) {
-		int numNodes = graph.numNodes();
+		int size = graph.size();
 		Arrays.fill(visible, false);
-		for (int x = 0; x < numNodes; x++)
+		for (int x = 0; x < size; x++)
 			if (x != node && graph.isConnected(x, node))
-				or(node, numNodes, visible, visibilityMapOfLastIteration, x);
+				or(node, size, visible, visibilityMapOfLastIteration, x);
 	}
 
 	private static void or(int start, int end, boolean[] lhs, Graph graph, int x) {
@@ -138,14 +138,14 @@ public final class AveragePathLengthCalculator implements LocalGraphStatisticCal
 			lhs[i] |= graph.isConnected(x, i);
 	}
 
-	private static double[] calculateAveragePathLengths(int numNodes, @Nullable int[] pathLenthSums) {
-		double[] averagePathLengths = new double[numNodes];
+	private static double[] calculateAveragePathLengths(int size, @Nullable int[] pathLenthSums) {
+		double[] averagePathLengths = new double[size];
 
 		if (pathLenthSums == null)
 			Arrays.fill(averagePathLengths, Double.NaN);
 		else
-			for (int i = 0; i < numNodes; i++)
-				averagePathLengths[i] = pathLenthSums[i] / (double)(numNodes - 1);
+			for (int i = 0; i < size; i++)
+				averagePathLengths[i] = pathLenthSums[i] / (double)(size - 1);
 
 		return averagePathLengths;
 	}

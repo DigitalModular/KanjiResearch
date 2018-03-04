@@ -35,7 +35,7 @@ import java.util.NoSuchElementException;
  */
 // Created 2018-02-04
 public interface Graph extends Serializable, Iterable<int[]> {
-	int numNodes();
+	int size();
 
 	void setConnection(int x, int y);
 
@@ -62,7 +62,7 @@ public interface Graph extends Serializable, Iterable<int[]> {
 
 			@Override
 			public boolean hasNext() {
-				return y < numNodes();
+				return y < size();
 			}
 
 			@Override
@@ -87,7 +87,7 @@ public interface Graph extends Serializable, Iterable<int[]> {
 					x++;
 					if (x >= y) {
 						y++;
-						if (y >= numNodes())
+						if (y >= size())
 							break;
 
 						x = 0;

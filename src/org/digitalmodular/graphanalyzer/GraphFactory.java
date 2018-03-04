@@ -37,20 +37,20 @@ import org.digitalmodular.graphapi.NeighborGraph;
 public final class GraphFactory {
 	private GraphFactory() { throw new AssertionError(); }
 
-	public static NeighborGraph newRandomGraph(int numNodes, int numConnections) {
-		if (numNodes < 1)
-			throw new IllegalArgumentException("numNodes should be at least 1: " + numNodes);
-		if (numConnections < 0 || numConnections > numNodes * (numNodes - 1) / 2)
+	public static NeighborGraph newRandomGraph(int size, int numConnections) {
+		if (size < 1)
+			throw new IllegalArgumentException("size should be at least 1: " + size);
+		if (numConnections < 0 || numConnections > size * (size - 1) / 2)
 			throw new IllegalArgumentException("'numConnections' should be in the range [0, " +
-			                                   (numNodes * (numNodes - 1) / 2) + "]: " + numNodes);
+			                                   (size * (size - 1) / 2) + "]: " + size);
 
-		NeighborGraph graph = new NeighborGraph(numNodes);
+		NeighborGraph graph = new NeighborGraph(size);
 		for (int i = 0; i < numConnections; i++) {
 			int x;
 			int y;
 			do {
-				x = ThreadLocalRandom.current().nextInt(numNodes);
-				y = ThreadLocalRandom.current().nextInt(numNodes);
+				x = ThreadLocalRandom.current().nextInt(size);
+				y = ThreadLocalRandom.current().nextInt(size);
 			} while (x == y || graph.isConnected(x, y));
 
 			graph.setConnection(x, y);

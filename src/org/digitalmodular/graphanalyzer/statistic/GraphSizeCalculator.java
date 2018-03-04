@@ -54,6 +54,6 @@ public final class GraphSizeCalculator implements GlobalGraphStatisticCalculator
 	public double calculate(NeighborGraph graph) {
 		requireNonNull(graph);
 
-		return graph.numNodes();
+		return graph.size();
 	}
 }

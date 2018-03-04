@@ -60,10 +60,10 @@ public final class BansalClusteringCoefficientCalculator implements LocalGraphSt
 	public double[] calculateAll(NeighborGraph graph) {
 		requireNonNull(graph);
 
-		int numNodes = graph.numNodes();
+		int size = graph.size();
 
-		double[] clusteringCoefficients = new double[numNodes];
-		for (int i = 0; i < numNodes; i++)
+		double[] clusteringCoefficients = new double[size];
+		for (int i = 0; i < size; i++)
 			clusteringCoefficients[i] = calculate(graph, i);
 
 		return clusteringCoefficients;

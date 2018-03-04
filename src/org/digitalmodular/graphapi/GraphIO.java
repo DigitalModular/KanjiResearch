@@ -88,18 +88,18 @@ public final class GraphIO {
 	private static Graph readTXT(String filename) throws IOException {
 		List<String> lines = Files.readAllLines(Paths.get(filename));
 
-		int numNodes = lines.size();
-		if (!(numNodes > 0))
+		int size = lines.size();
+		if (!(size > 0))
 			throw new IllegalArgumentException("Empty file: " + filename);
 
-		Graph graph = new MatrixGraph(numNodes);
+		Graph graph = new MatrixGraph(size);
 		for (int y = 0; y < lines.size(); y++) {
 			String line = lines.get(y);
-			if (line.length() != numNodes)
+			if (line.length() != size)
 				throw new IOException("Line length mismatch: " + filename +
-				                      " @ line " + (y + 1) + " (numNodes = " + numNodes + ')');
+				                      " @ line " + (y + 1) + " (size = " + size + ')');
 
-			for (int x = 0; x < numNodes; x++) {
+			for (int x = 0; x < size; x++) {
 				char c = line.charAt(x);
 				if (c != '0' && c != '1')
 					throw new IOException("Invalid char found: " + filename +
@@ -122,11 +122,11 @@ public final class GraphIO {
 	}
 
 	private static void writeTXT(Graph graph, String filename) throws IOException {
-		int numNodes = graph.numNodes();
+		int size = graph.size();
 
 		try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(filename))) {
-			for (int y = 0; y < numNodes; y++) {
-				for (int x = 0; x < numNodes; x++)
+			for (int y = 0; y < size; y++) {
+				for (int x = 0; x < size; x++)
 					out.write(graph.isConnected(x, y) ? '1' : '0');
 
 				out.write('\n');
@@ -142,14 +142,14 @@ public final class GraphIO {
 		if (!lines.get(0).startsWith("Size:"))
 			throw new IOException("First line of file doesn't start with \"Size:\": " + filename);
 
-		int numNodes;
+		int size;
 		try {
-			numNodes = Integer.parseInt(lines.get(0).substring(5).trim());
+			size = Integer.parseInt(lines.get(0).substring(5).trim());
 		} catch (NumberFormatException ignored) {
 			throw new IOException("Size is not an integer: \"" + lines.get(0) + '"');
 		}
 
-		Graph graph = new NeighborGraph(numNodes);
+		Graph graph = new NeighborGraph(size);
 		for (int i = 1; i < lines.size(); i++) {
 			String line = lines.get(i);
 
@@ -189,7 +189,7 @@ public final class GraphIO {
 		try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename),
 		                                                                    StandardCharsets.US_ASCII))) {
 			out.write("Size: ");
-			out.write(String.valueOf(graph.numNodes()));
+			out.write(String.valueOf(graph.size()));
 			out.newLine();
 
 			out.write("Number of isolated nodes: ");
@@ -215,18 +215,18 @@ public final class GraphIO {
 	}
 
 	private static Graph readIMG(String filename) throws IOException {
-		BufferedImage img      = ImageIO.read(new File(filename));
-		int           numNodes = img.getWidth();
-		if (numNodes != img.getHeight())
+		BufferedImage img  = ImageIO.read(new File(filename));
+		int           size = img.getWidth();
+		if (size != img.getHeight())
 			throw new IllegalArgumentException("Image is not square: " + filename +
-			                                   " (" + numNodes + ", " + img.getHeight() + ')');
+			                                   " (" + size + ", " + img.getHeight() + ')');
 
-		if (numNodes <= 0)
+		if (size <= 0)
 			throw new IllegalArgumentException("Empty file: " + filename);
 
-		Graph graph = new MatrixGraph(numNodes);
-		for (int y = 0; y < numNodes; y++) {
-			for (int x = 0; x < numNodes; x++) {
+		Graph graph = new MatrixGraph(size);
+		for (int y = 0; y < size; y++) {
+			for (int x = 0; x < size; x++) {
 				int i = img.getRGB(x, y);
 				if (i != -1 && i != 0xFF000000)
 					throw new IOException("Image contains values other than black and white: " + filename +
@@ -250,10 +250,10 @@ public final class GraphIO {
 	}
 
 	private static void writePNG(Graph graph, String filename) throws IOException {
-		int           numNodes = graph.numNodes();
-		BufferedImage img      = new BufferedImage(numNodes, numNodes, BufferedImage.TYPE_BYTE_GRAY);
-		for (int y = 0; y < numNodes; y++)
-			for (int x = 0; x < numNodes; x++)
+		int           size = graph.size();
+		BufferedImage img  = new BufferedImage(size, size, BufferedImage.TYPE_BYTE_GRAY);
+		for (int y = 0; y < size; y++)
+			for (int x = 0; x < size; x++)
 				img.setRGB(x, y, graph.isConnected(x, y) ? 0 : -1);
 
 		ImageIO.write(img, "PNG", new File(filename));

@@ -52,9 +52,9 @@ public final class NodeDegreeCalculator implements LocalGraphStatisticCalculator
 	public double[] calculateAll(NeighborGraph graph) {
 		requireNonNull(graph);
 
-		int      numNodes     = graph.numNodes();
-		double[] numNeighbors = new double[numNodes];
-		for (int node = 0; node < numNodes; node++)
+		int      size         = graph.size();
+		double[] numNeighbors = new double[size];
+		for (int node = 0; node < size; node++)
 			numNeighbors[node] = graph.numNeighbors(node);
 
 		return numNeighbors;
