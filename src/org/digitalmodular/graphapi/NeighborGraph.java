@@ -26,13 +26,14 @@
  */
 package org.digitalmodular.graphapi;
 
-import java.util.ArrayList;
-import java.util.List;
-import static java.util.Collections.unmodifiableList;
+import java.util.Arrays;
+import static java.util.Arrays.binarySearch;
 import static java.util.Objects.requireNonNull;
 
 /**
  * Undirected unweighted graph without self-loops
+ * <p>
+ * Not Thread-safe.
  *
  * @author Mark Jeronimus
  */
@@ -40,14 +41,12 @@ import static java.util.Objects.requireNonNull;
 public class NeighborGraph implements Graph {
 	private static final long serialVersionUID = -5755588310875985669L;
 
-	private final List<List<Integer>> neighbors;
+	private final int[]   numNeighbors;
+	private final int[][] neighbors;
 
 	public NeighborGraph(int size) {
-		List<List<Integer>> neighbors = new ArrayList<>(size);
-		for (int y = 0; y < size; y++)
-			neighbors.add(new ArrayList<>(size - 1));
-
-		this.neighbors = unmodifiableList(neighbors);
+		numNeighbors = new int[size];
+		neighbors = new int[size][size - 1];
 	}
 
 	public NeighborGraph(Graph other) {
@@ -59,7 +58,7 @@ public class NeighborGraph implements Graph {
 
 	@Override
 	public int size() {
-		return neighbors.size();
+		return neighbors.length;
 	}
 
 	@Override
@@ -67,8 +66,8 @@ public class NeighborGraph implements Graph {
 		if (isConnected(x, y) || x == y)
 			return;
 
-		addNeighbor(neighbors.get(x), y);
-		addNeighbor(neighbors.get(y), x);
+		addNeighbor(x, y);
+		addNeighbor(y, x);
 	}
 
 	@Override
@@ -82,72 +81,76 @@ public class NeighborGraph implements Graph {
 
 	@Override
 	public boolean isConnected(int x, int y) {
-		List<Integer> neighborsOfNode = neighbors.get(y);
-		return binarySearch(neighborsOfNode, x) >= 0;
+		if (numNeighbors[x] < numNeighbors[y])
+			return binarySearch(neighbors[x], 0, numNeighbors[x], y) >= 0;
+		else
+			return binarySearch(neighbors[y], 0, numNeighbors[y], x) >= 0;
 	}
 
 	@Override
 	public void setGraph(Graph other) {
 		requireNonNull(other);
-		int size = size();
+		int size = neighbors.length;
 		if (size != other.size())
 			throw new IllegalArgumentException("Network sizes differ: " + size + " vs " + other.size());
 
-		for (int y = 0; y < size; y++) {
-			neighbors.get(y).clear();
-			for (int x = 0; x < size; x++)
-				if (x != y && other.isConnected(x, y))
-					neighbors.get(y).add(x);
+		if (other instanceof NeighborGraph) {
+			System.arraycopy(((NeighborGraph)other).numNeighbors, 0, numNeighbors, 0, size);
+			for (int i = 0; i < size; i++)
+				System.arraycopy(((NeighborGraph)other).neighbors[i], 0, neighbors[i], 0, numNeighbors[i]);
+		} else {
+			Arrays.fill(numNeighbors, 0);
+
+			ConnectionIterator iterator   = other.iterator();
+			int[]              connection = new int[2];
+			while (iterator.hasNext()) {
+				iterator.next(connection);
+				setConnection(connection[0], connection[1]);
+			}
 		}
 	}
 
-	public int numNeighbors(int node)           { return neighbors.get(node).size(); }
+	public int numNeighbors(int node)           { return numNeighbors[node]; }
 
-	public int getNeighbor(int node, int index) { return neighbors.get(node).get(index); }
+	public int getNeighbor(int node, int index) { return neighbors[node][index]; }
 
-	private static void addNeighbor(List<Integer> neighborsOfNode, int newNeighbor) {
-		int insertionPoint = binarySearch(neighborsOfNode, newNeighbor);
+	private void addNeighbor(int node, int newNeighbor) {
+		int[] neighborsOfNode = neighbors[node];
+		int   insertionPoint  = binarySearch(neighborsOfNode, 0, numNeighbors[node], newNeighbor);
 		assert insertionPoint < 0;
-		neighborsOfNode.add(-insertionPoint - 1, newNeighbor);
+		int newPosition = -insertionPoint - 1;
+
+		System.arraycopy(neighborsOfNode, newPosition,
+		                 neighborsOfNode, newPosition + 1,
+		                 numNeighbors[node] - newPosition);
+
+		neighborsOfNode[newPosition] = newNeighbor;
+		numNeighbors[node]++;
 	}
 
-	private void removeNeighbor(int node1, int node2) {
-		Integer removed = neighbors.get(node1).remove(node2);
-		assert removed != null;
+	private void removeNeighbor(int node, int oldNeighbor) {
+		int[] neighborsOfNode = neighbors[node];
+		int   position        = binarySearch(neighborsOfNode, 0, numNeighbors[node], oldNeighbor);
+		assert position >= 0;
+
+		System.arraycopy(neighborsOfNode, position + 1,
+		                 neighborsOfNode, position,
+		                 numNeighbors[node] - position - 1);
+		numNeighbors[node]--;
 	}
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder(size() * GraphUtilities.countConnections(this) * 4);
+		StringBuilder sb = new StringBuilder(neighbors.length * GraphUtilities.countConnections(this) * 4);
 
-		for (int y = 0; y < neighbors.size(); y++) {
-			if (y > 0)
+		for (int node = 0; node < neighbors.length; node++) {
+			if (node > 0)
 				sb.append('\n');
 
-			sb.append(y).append(' ');
-			List<Integer> neighbors = this.neighbors.get(y);
-			for (int x : neighbors)
-				sb.append(' ').append(x);
+			sb.append(node).append(' ');
+			for (int i = 0; i < numNeighbors[node]; i++)
+				sb.append(' ').append(this.neighbors[node][i]);
 		}
 		return sb.toString();
-	}
-
-	// Modified from Collections.binarySearch()
-	private static int binarySearch(List<Integer> list, int key) {
-		int low  = 0;
-		int high = list.size() - 1;
-
-		while (low <= high) {
-			int mid    = (low + high) >>> 1;
-			int midVal = list.get(mid);
-
-			if (midVal < key)
-				low = mid + 1;
-			else if (midVal > key)
-				high = mid - 1;
-			else
-				return mid;
-		}
-		return -(low + 1);
 	}
 }
