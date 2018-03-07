@@ -26,11 +26,7 @@
  */
 package org.digitalmodular.graphapi;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 import static java.util.Objects.requireNonNull;
 
 import org.digitalmodular.graphapi.Graph.ConnectionIterator;
@@ -41,30 +37,27 @@ import org.digitalmodular.graphapi.Graph.ConnectionIterator;
  * @author Mark Jeronimus
  */
 // Created 2018-03-03
-public final class SubGraphSplitter {
-	private SubGraphSplitter() { throw new AssertionError(); }
+public final class IsolatedSubGraphFinder {
+	private IsolatedSubGraphFinder() { throw new AssertionError(); }
 
-	public static List<NeighborGraph> splitGraph(NeighborGraph graph) {
+	private static final int[][] EMPTY_INTS_ARRAY = new int[0][];
+
+	public static int[][] findIsolatedSubGraphs(NeighborGraph graph) {
 		requireNonNull(graph);
 
 		int size = graph.size();
 		if (size == 0)
-			return Collections.emptyList();
+			return EMPTY_INTS_ARRAY;
 		if (size == 1)
-			return Collections.singletonList(graph);
+			return new int[][]{{0}};
 
 		int[] startingNodes = findSubGraphStartingNodes(graph);
 
-		int[][] subGraphData = findSubGraphData(graph, startingNodes);
-
-		List<NeighborGraph> subGraphs = constructSubGraphs(graph, subGraphData);
-
-		subGraphs.sort(Comparator.comparingInt(Graph::size).reversed());
-		return Collections.unmodifiableList(subGraphs);
+		return findSubGraphPermutations(graph, startingNodes);
 	}
 
-	/**
-	 * Example of result: [0, 1, 1, 3, 1, 1, 0, 1, 1, 1]
+	/*
+	 * Example Output: [0, 1, 1, 3, 1, 1, 0, 1, 1, 1]
 	 */
 	private static int[] findSubGraphStartingNodes(Graph graph) {
 		int size = graph.size();
@@ -102,76 +95,61 @@ public final class SubGraphSplitter {
 		throw new AssertionError("Iteration overflow");
 	}
 
-	/**
-	 * Example of result: [[2, 7, 1],
-	 * [0, 1, 1, 2, 1, 1, 0, 1, 1, 1],
-	 * [0, 0, 1, 0, 2, 3, 1, 4, 5, 6]]
+	/*
+	 * Example Input:  [0, 1, 1, 3, 1, 1, 0, 1, 1, 1]
+	 * Example Output: [[0, 6], [1, 2, 4, 5, 7, 8, 9], [3]]
 	 */
 	@SuppressWarnings("TooBroadScope")
-	private static int[][] findSubGraphData(Graph graph, int[] startingNodes) {
+	private static int[][] findSubGraphPermutations(Graph graph, int[] startingNodes) {
 		int size = graph.size();
 
-		int[] subGraphSizes = new int[size];
-		int   numSubGraphs  = 0;
-		int[] nodeMap       = new int[size];
-		int[] graphMap      = new int[size];
-		Arrays.fill(graphMap, -1);
+		int[] startingNodeToSubGraphIndex = new int[size]; // Example Intermediate: [0, 1, ◌, 2, ...]
+		int[] subGraphSizes               = new int[size]; // Example Intermediate: [2, 7, 1, ...]
+		int[] subGraphIndices             = new int[size]; // Example Intermediate: [0, 1, 1, 2, 1, 1, 0, 1, 1, 1]
+		int   numSubGraphs                = 0;
 
-		for (int startingNode = 0; startingNode < size; startingNode++) {
-			if (graphMap[startingNode] >= 0)
-				continue;
+		Arrays.fill(startingNodeToSubGraphIndex, -1);
 
-			int numSubNodes = 0;
-			int n           = 0;
-			for (int node = 0; node < size; node++) {
-				if (startingNodes[node] == startingNode) {
-					numSubNodes++;
-					nodeMap[node] = n++;
-					graphMap[node] = numSubGraphs;
-				}
+		for (int i = 0; i < size; i++) {
+			if (startingNodeToSubGraphIndex[startingNodes[i]] == -1) {
+				startingNodeToSubGraphIndex[startingNodes[i]] = numSubGraphs;
+				numSubGraphs++;
 			}
 
-			subGraphSizes[numSubGraphs] = numSubNodes;
-			numSubGraphs++;
+			int subGraphIndex = startingNodeToSubGraphIndex[startingNodes[i]];
+
+			subGraphSizes[subGraphIndex]++;
+			subGraphIndices[i] = subGraphIndex;
 		}
 
-		subGraphSizes = Arrays.copyOf(subGraphSizes, numSubGraphs);
-
-		return new int[][]{subGraphSizes, nodeMap, graphMap};
+		return makePermutations(size, numSubGraphs, subGraphSizes, subGraphIndices);
 	}
 
-	@SuppressWarnings("TypeMayBeWeakened") // Suppress IntelliJ bug: Weakening `graph` creates compiler errors!
-	private static List<NeighborGraph> constructSubGraphs(Graph graph, int[][] subGraphData) {
-		int[] subGraphSizes = subGraphData[0];
-		int[] nodeMap       = subGraphData[1];
-		int[] graphMap      = subGraphData[2];
+	/*
+	 * Example Input:  10, 3, [2, 7, 1, ...], [0, 1, 1, 2, 1, 1, 0, 1, 1, 1]
+	 * Example Output: [[0, 6], [1, 2, 4, 5, 7, 8, 9], [3]]
+	 */
+	private static int[][] makePermutations(int size, int numSubGraphs, int[] subGraphSizes, int[] subGraphIndices) {
+		int[][] permutations = preparePermutations(numSubGraphs, subGraphSizes);
 
-		List<NeighborGraph> subGraphs = initSubGraphsList(subGraphSizes);
-
-		ConnectionIterator iterator   = graph.iterator();
-		int[]              connection = new int[2];
-		while (iterator.hasNext()) {
-			iterator.next(connection);
-			int x = connection[0];
-			int y = connection[1];
-			assert x < y;
-
-			Graph subGraph = subGraphs.get(graphMap[x]);
-
-			//noinspection ObjectEquality // Comparing identity, not equality.
-			assert subGraph == subGraphs.get(graphMap[y]);
-
-			subGraph.setConnection(nodeMap[x], nodeMap[y]);
+		int[] indicesInSubGraphs = new int[numSubGraphs];
+		for (int i = 0; i < size; i++) {
+			int subGraphIndex = subGraphIndices[i];
+			permutations[subGraphIndex][indicesInSubGraphs[subGraphIndex]++] = i;
 		}
 
-		return subGraphs;
+		return permutations;
 	}
 
-	private static List<NeighborGraph> initSubGraphsList(int[] subGraphSizes) {
-		List<NeighborGraph> subGraphs = new ArrayList<>(subGraphSizes.length);
-		for (int subGraphSize : subGraphSizes)
-			subGraphs.add(new NeighborGraph(subGraphSize));
+	/*
+	 * Example Input:  3, [2, 7, 1, ...]
+	 * Example Output: [int[2], int[7], int[1]]
+	 */
+	private static int[][] preparePermutations(int numSubGraphs, int[] subGraphSizes) {
+		int[][] permutations = new int[numSubGraphs][];
+		for (int i = 0; i < numSubGraphs; i++)
+			permutations[i] = new int[subGraphSizes[i]];
 
-		return subGraphs;
+		return permutations;
 	}
 }

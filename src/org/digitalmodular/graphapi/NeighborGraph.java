@@ -133,6 +133,63 @@ public class NeighborGraph extends MatrixGraph {
 		numNeighbors[node]--;
 	}
 
+	/**
+	 * Example Input: [1, 2, 4, 5, 7, 8, 9]
+	 */
+	public NeighborGraph subGraph(int[] permutation) {
+		requireNonNull(permutation, "permutation");
+
+		if (permutation.length < 2)
+			return new NeighborGraph(permutation.length);
+
+		int[] reverseMap = buildReverseMap(permutation); // Example Intermediate: [◌, 0, 1, ◌, 2, 3, ◌, 4, 5, 6]
+
+		NeighborGraph subGraph = new NeighborGraph(permutation.length);
+
+		ConnectionIterator iterator   = iterator();
+		int[]              connection = new int[2];
+		while (iterator.hasNext()) {
+			iterator.next(connection);
+			int x = connection[0];
+			int y = connection[1];
+			assert x < y;
+
+			x = reverseMap[x];
+			if (x < 0)
+				continue;
+
+			y = reverseMap[y];
+			if (y < 0)
+				continue;
+
+			assert x < y;
+
+			subGraph.setConnection(x, y);
+		}
+
+		return subGraph;
+	}
+
+	/*
+	 * Example Input:  [1, 2, 4, 5, 7, 8, 9]
+	 * Example Output: [◌, 0, 1, ◌, 2, 3, ◌, 4, 5, 6]
+	 */
+	private int[] buildReverseMap(int[] permutation) {
+		int size = size();
+
+		int[] reverseMap = new int[size];
+		Arrays.fill(reverseMap, -1);
+		for (int i = 0; i < permutation.length; i++) {
+			int p = permutation[i];
+			if (p >= size)
+				throw new IllegalArgumentException("permutation[" + i + "] = " + p + ", size = " + size);
+
+			reverseMap[p] = i;
+		}
+
+		return reverseMap;
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(neighbors.length * GraphUtilities.countConnections(this) * 4);
