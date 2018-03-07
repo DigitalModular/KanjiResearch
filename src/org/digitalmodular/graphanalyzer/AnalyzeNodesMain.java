@@ -60,7 +60,7 @@ public final class AnalyzeNodesMain {
 		int[][] permutations = IsolatedSubGraphFinder.findIsolatedSubGraphs(graph);
 		Arrays.sort(permutations, Comparator.comparingInt((int[] i) -> i.length).reversed());
 
-		graph = graph.subGraph(permutations[0]);
+		graph = graph.permute(permutations[0]);
 
 		int size = graph.size();
 		Benchmark.record("subGraph");

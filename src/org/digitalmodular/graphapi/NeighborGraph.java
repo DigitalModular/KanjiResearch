@@ -136,7 +136,7 @@ public class NeighborGraph extends MatrixGraph {
 	/**
 	 * Example Input: [1, 2, 4, 5, 7, 8, 9]
 	 */
-	public NeighborGraph subGraph(int[] permutation) {
+	public NeighborGraph permute(int[] permutation) {
 		requireNonNull(permutation, "permutation");
 
 		if (permutation.length < 2)
@@ -183,6 +183,9 @@ public class NeighborGraph extends MatrixGraph {
 			int p = permutation[i];
 			if (p >= size)
 				throw new IllegalArgumentException("permutation[" + i + "] = " + p + ", size = " + size);
+			if (reverseMap[p] >= 0)
+				throw new IllegalArgumentException("permutation[" + reverseMap[p] +
+				                                   "] == permutation[" + i + "] == " + p);
 
 			reverseMap[p] = i;
 		}
