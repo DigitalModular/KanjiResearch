@@ -27,17 +27,20 @@
 package org.digitalmodular.kanjiresearch.tools;
 
 import java.io.IOException;
+import java.lang.Character.UnicodeBlock;
 
-import org.digitalmodular.kanjiresearch.util.CorpusFrequency;
 import org.digitalmodular.kanjiresearch.util.CorpusFrequencyIO;
+import org.digitalmodular.kanjiresearch.util.FrequencyCorpus;
 
 /**
  * @author Mark Jeronimus
  */
 // Created 2018-03-15
-public final class MakeKanjiCorpusMain {
+public final class MakeFrequencyCorporaMain {
 	public static void main(String... args) throws IOException {
-		CorpusFrequency wordFrequency = CorpusFrequencyIO.read("corpora/internet-jp-forms.tsv");
-		CorpusFrequencyIO.write(wordFrequency, "corpora/wordFrequency.tsv");
+		FrequencyCorpus rawFrequency = CorpusFrequencyIO.read("corpora/internet-jp-forms.tsv");
+
+		FrequencyCorpus wordFrequency = makeWordFrequency(rawFrequency);
+		CorpusFrequencyIO.write(wordFrequency, "corpora/kanjiFrequency.tsv");
 	}
 }

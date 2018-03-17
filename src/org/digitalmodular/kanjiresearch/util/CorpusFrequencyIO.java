@@ -28,7 +28,6 @@ package org.digitalmodular.kanjiresearch.util;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.lang.Character.UnicodeBlock;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -43,22 +42,22 @@ public final class CorpusFrequencyIO {
 
 	private static final Pattern CSV_SPLITTER = Pattern.compile("\\s+|(\\s*,\\s*)");
 
-	public static void write(CorpusFrequency corpusFrequency, String filename) throws IOException {
+	public static void write(FrequencyCorpus frequencyCorpus, String filename) throws IOException {
 		try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(filename))) {
-			int n = corpusFrequency.size();
+			int n = frequencyCorpus.size();
 			for (int i = 0; i < n; i++) {
-				writer.write(corpusFrequency.getPhrase(i));
+				writer.write(frequencyCorpus.getPhrase(i));
 				writer.write('\t');
-				writer.write(Double.toString(corpusFrequency.getFrequency(i)));
+				writer.write(Double.toString(frequencyCorpus.getFrequency(i)));
 				writer.write('\n');
 			}
 		}
 	}
 
-	public static CorpusFrequency read(String filename) throws IOException {
+	public static FrequencyCorpus read(String filename) throws IOException {
 		List<String> lines = Files.readAllLines(Paths.get(filename));
 
-		CorpusFrequency corpus = new CorpusFrequency(lines.size());
+		FrequencyCorpus corpus = new FrequencyCorpus(lines.size());
 
 		for (String line : lines)
 			decodeLine(line, corpus);
@@ -66,43 +65,15 @@ public final class CorpusFrequencyIO {
 		return corpus;
 	}
 
-	private static void decodeLine(CharSequence line, CorpusFrequency corpus) throws IOException {
+	private static void decodeLine(CharSequence line, FrequencyCorpus corpus) throws IOException {
 		String[] parts = CSV_SPLITTER.split(line);
 		if (parts.length != 2)
 			throw new IOException("Expected two columns: \"" + line + '"');
 
 		try {
-			String phrase = parts[0];
-
-			if (phrase.codePoints().noneMatch(CorpusFrequencyIO::characterToKeep))
-				return;
-
-			corpus.add(phrase, Double.parseDouble(parts[1]));
+			corpus.add(parts[0], Double.parseDouble(parts[1]));
 		} catch (NumberFormatException ignored) {
 			throw new IOException("Not a frequency: \"" + line + '"');
 		}
-	}
-
-	@SuppressWarnings("ObjectEquality") // Comparing identity, not equality.
-	private static boolean characterToKeep(int codePoint) {
-		UnicodeBlock block = UnicodeBlock.of(codePoint);
-
-		if (block != UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS &&
-		    block != UnicodeBlock.KATAKANA &&
-		    block != UnicodeBlock.HIRAGANA &&
-		    block != UnicodeBlock.CJK_SYMBOLS_AND_PUNCTUATION &&
-		    block != UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A &&
-		    block != UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B &&
-		    block != UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_C &&
-		    block != UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_D &&
-		    block != UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS &&
-		    block != UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS_SUPPLEMENT) {
-			return false;
-		}
-
-		int type = Character.getType(codePoint);
-
-		return type == Character.OTHER_LETTER ||
-		       type == Character.MODIFIER_LETTER;
 	}
 }

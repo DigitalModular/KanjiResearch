@@ -32,14 +32,14 @@ import java.util.Formatter;
  * @author Mark Jeronimus
  */
 // Created 2018-03-13
-public class CorpusFrequency {
+public class FrequencyCorpus {
 	private final String[] phrases;
 	private final double[] frequencies;
 
 	private int    size           = 0;
 	private double totalFrequency = 0;
 
-	public CorpusFrequency(int capacity) {
+	public FrequencyCorpus(int capacity) {
 		phrases = new String[capacity];
 		frequencies = new double[capacity];
 	}
@@ -58,15 +58,35 @@ public class CorpusFrequency {
 		totalFrequency += frequency;
 	}
 
-	public int size()                               { return size; }
+	public int size() { return size; }
 
-	public String getPhrase(int index)              { return phrases[index]; }
+	public String getPhrase(int index) {
+		if (size < 0 || index >= size)
+			throw new IndexOutOfBoundsException("'index' must be in the range [0, " + (size - 1) + ']');
 
-	public double getFrequency(int index)           { return frequencies[index]; }
+		return phrases[index];
+	}
 
-	public double getNormalizedFrequency(int index) { return frequencies[index] / totalFrequency; }
+	public double getFrequency(int index) {
+		if (size < 0 || index >= size)
+			throw new IndexOutOfBoundsException("'index' must be in the range [0, " + (size - 1) + ']');
 
-	public double getLogFrequency(int index)        { return Math.log(frequencies[index] / totalFrequency); }
+		return frequencies[index];
+	}
+
+	public double getNormalizedFrequency(int index) {
+		if (size < 0 || index >= size)
+			throw new IndexOutOfBoundsException("'index' must be in the range [0, " + (size - 1) + ']');
+
+		return frequencies[index] / totalFrequency;
+	}
+
+	public double getLogFrequency(int index) {
+		if (size < 0 || index >= size)
+			throw new IndexOutOfBoundsException("'index' must be in the range [0, " + (size - 1) + ']');
+
+		return Math.log(frequencies[index] / totalFrequency);
+	}
 
 	@Override
 	public String toString() {
