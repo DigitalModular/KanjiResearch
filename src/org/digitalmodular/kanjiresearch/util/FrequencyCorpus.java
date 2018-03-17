@@ -27,6 +27,7 @@
 package org.digitalmodular.kanjiresearch.util;
 
 import java.util.Formatter;
+import static java.util.Objects.requireNonNull;
 
 /**
  * @author Mark Jeronimus
@@ -36,62 +37,55 @@ public class FrequencyCorpus {
 	private final String[] phrases;
 	private final double[] frequencies;
 
-	private int    size           = 0;
 	private double totalFrequency = 0;
 
-	public FrequencyCorpus(int capacity) {
-		phrases = new String[capacity];
-		frequencies = new double[capacity];
+	FrequencyCorpus(String[] phrases, double[] frequencies) {
+		requireNonNull(phrases, "phrases");
+		requireNonNull(frequencies, "frequencies");
+		if (phrases.length != frequencies.length)
+			throw new IllegalArgumentException("Length mismatch: " + phrases.length + " vs " + frequencies.length);
+
+		this.phrases = phrases;
+		this.frequencies = frequencies;
+
+		for (double frequency : frequencies)
+			totalFrequency += frequency;
 	}
 
-	public void add(String phrase, double frequency) {
-		if (size == phrases.length)
-			throw new IllegalStateException("Capacity reached: " + size);
-
-		if (frequency <= 0)
-			throw new IllegalArgumentException("Frequency not positive: {" + phrase + ", " + frequency + '}');
-
-		phrases[size] = phrase;
-		frequencies[size] = frequency;
-
-		size++;
-		totalFrequency += frequency;
-	}
-
-	public int size() { return size; }
+	public int size() { return phrases.length; }
 
 	public String getPhrase(int index) {
-		if (size < 0 || index >= size)
-			throw new IndexOutOfBoundsException("'index' must be in the range [0, " + (size - 1) + ']');
+		if (index < 0 || index >= phrases.length)
+			throw new IndexOutOfBoundsException("'index' must be in the range [0, " + (phrases.length - 1) + ']');
 
 		return phrases[index];
 	}
 
 	public double getFrequency(int index) {
-		if (size < 0 || index >= size)
-			throw new IndexOutOfBoundsException("'index' must be in the range [0, " + (size - 1) + ']');
+		if (index < 0 || index >= phrases.length)
+			throw new IndexOutOfBoundsException("'index' must be in the range [0, " + (phrases.length - 1) + ']');
 
 		return frequencies[index];
 	}
 
 	public double getNormalizedFrequency(int index) {
-		if (size < 0 || index >= size)
-			throw new IndexOutOfBoundsException("'index' must be in the range [0, " + (size - 1) + ']');
+		if (index < 0 || index >= phrases.length)
+			throw new IndexOutOfBoundsException("'index' must be in the range [0, " + (phrases.length - 1) + ']');
 
 		return frequencies[index] / totalFrequency;
 	}
 
 	public double getLogFrequency(int index) {
-		if (size < 0 || index >= size)
-			throw new IndexOutOfBoundsException("'index' must be in the range [0, " + (size - 1) + ']');
+		if (index < 0 || index >= phrases.length)
+			throw new IndexOutOfBoundsException("'index' must be in the range [0, " + (phrases.length - 1) + ']');
 
 		return Math.log(frequencies[index] / totalFrequency);
 	}
 
 	@Override
 	public String toString() {
-		try (Formatter formatter = new Formatter(new StringBuilder(size * 30))) {
-			for (int i = 0; i < size; i++)
+		try (Formatter formatter = new Formatter(new StringBuilder(phrases.length * 30))) {
+			for (int i = 0; i < phrases.length; i++)
 				formatter.format("%s\t%.8f\n", phrases[i], frequencies[i] / totalFrequency);
 
 			return formatter.toString();

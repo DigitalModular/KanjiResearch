@@ -31,6 +31,7 @@ import java.lang.Character.UnicodeBlock;
 
 import org.digitalmodular.kanjiresearch.util.CorpusFrequencyIO;
 import org.digitalmodular.kanjiresearch.util.FrequencyCorpus;
+import org.digitalmodular.kanjiresearch.util.FrequencyCorpusBuilder;
 
 /**
  * @author Mark Jeronimus
@@ -45,7 +46,7 @@ public final class MakeFrequencyCorporaMain {
 	}
 
 	private static FrequencyCorpus makeWordFrequency(FrequencyCorpus rawFrequency) {
-		FrequencyCorpus wordFrequency = new FrequencyCorpus(rawFrequency.size());
+		FrequencyCorpusBuilder wordFrequency = new FrequencyCorpusBuilder(rawFrequency.size());
 
 		for (int i = 0; i < rawFrequency.size(); i++) {
 			String phrase = rawFrequency.getPhrase(i);
@@ -56,7 +57,7 @@ public final class MakeFrequencyCorporaMain {
 			wordFrequency.add(phrase, rawFrequency.getFrequency(i));
 		}
 
-		return wordFrequency;
+		return wordFrequency.build();
 	}
 
 	@SuppressWarnings("ObjectEquality") // Comparing identity, not equality.

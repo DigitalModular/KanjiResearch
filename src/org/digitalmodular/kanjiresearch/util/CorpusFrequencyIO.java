@@ -57,15 +57,15 @@ public final class CorpusFrequencyIO {
 	public static FrequencyCorpus read(String filename) throws IOException {
 		List<String> lines = Files.readAllLines(Paths.get(filename));
 
-		FrequencyCorpus corpus = new FrequencyCorpus(lines.size());
+		FrequencyCorpusBuilder corpus = new FrequencyCorpusBuilder(lines.size());
 
 		for (String line : lines)
 			decodeLine(line, corpus);
 
-		return corpus;
+		return corpus.build();
 	}
 
-	private static void decodeLine(CharSequence line, FrequencyCorpus corpus) throws IOException {
+	private static void decodeLine(CharSequence line, FrequencyCorpusBuilder corpus) throws IOException {
 		String[] parts = CSV_SPLITTER.split(line);
 		if (parts.length != 2)
 			throw new IOException("Expected two columns: \"" + line + '"');
