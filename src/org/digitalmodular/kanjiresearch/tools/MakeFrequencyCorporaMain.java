@@ -43,4 +43,42 @@ public final class MakeFrequencyCorporaMain {
 		FrequencyCorpus wordFrequency = makeWordFrequency(rawFrequency);
 		CorpusFrequencyIO.write(wordFrequency, "corpora/kanjiFrequency.tsv");
 	}
+
+	private static FrequencyCorpus makeWordFrequency(FrequencyCorpus rawFrequency) {
+		FrequencyCorpus wordFrequency = new FrequencyCorpus(rawFrequency.size());
+
+		for (int i = 0; i < rawFrequency.size(); i++) {
+			String phrase = rawFrequency.getPhrase(i);
+
+			if (phrase.codePoints().noneMatch(MakeFrequencyCorporaMain::isCharacterToKeep))
+				continue;
+
+			wordFrequency.add(phrase, rawFrequency.getFrequency(i));
+		}
+
+		return wordFrequency;
+	}
+
+	@SuppressWarnings("ObjectEquality") // Comparing identity, not equality.
+	private static boolean isCharacterToKeep(int codePoint) {
+		UnicodeBlock block = UnicodeBlock.of(codePoint);
+
+		if (block != UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS &&
+		    block != UnicodeBlock.KATAKANA &&
+		    block != UnicodeBlock.HIRAGANA &&
+		    block != UnicodeBlock.CJK_SYMBOLS_AND_PUNCTUATION &&
+		    block != UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A &&
+		    block != UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B &&
+		    block != UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_C &&
+		    block != UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_D &&
+		    block != UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS &&
+		    block != UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS_SUPPLEMENT) {
+			return false;
+		}
+
+		int type = Character.getType(codePoint);
+
+		return type == Character.OTHER_LETTER ||
+		       type == Character.MODIFIER_LETTER;
+	}
 }
