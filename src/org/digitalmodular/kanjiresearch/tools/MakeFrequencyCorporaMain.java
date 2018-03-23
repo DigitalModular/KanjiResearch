@@ -27,17 +27,22 @@
 package org.digitalmodular.kanjiresearch.tools;
 
 import java.io.IOException;
-import java.lang.Character.UnicodeBlock;
+import java.util.Collection;
 
 import org.digitalmodular.kanjiresearch.util.CorpusFrequencyIO;
 import org.digitalmodular.kanjiresearch.util.FrequencyCorpus;
 import org.digitalmodular.kanjiresearch.util.FrequencyCorpusBuilder;
+import org.digitalmodular.kanjiresearch.util.KanjiUtilities;
+import org.digitalmodular.kanjiresearch.util.RadKFileIO;
+import org.digitalmodular.kanjiresearch.util.TaggedKanjiList;
 
 /**
  * @author Mark Jeronimus
  */
 // Created 2018-03-15
 public final class MakeFrequencyCorporaMain {
+	private MakeFrequencyCorporaMain() {throw new AssertionError(); }
+
 	public static void main(String... args) throws IOException {
 		FrequencyCorpus rawFrequency = CorpusFrequencyIO.read("corpora/internet-jp-forms.tsv");
 
@@ -65,8 +70,8 @@ public final class MakeFrequencyCorporaMain {
 
 	@SuppressWarnings("ObjectEquality") // Comparing identity, not equality.
 	private static boolean isCharacterToKeep(int codePoint) {
-		return isKanji(codePoint) ||
-		       isKana(codePoint);
+		return KanjiUtilities.isKanji(codePoint) ||
+		       KanjiUtilities.isKana(codePoint);
 	}
 
 	private static FrequencyCorpus makeKanjiFrequency(FrequencyCorpus wordFrequency) {
@@ -76,40 +81,11 @@ public final class MakeFrequencyCorporaMain {
 			int index = i;
 			wordFrequency.getPhrase(i)
 			             .codePoints()
-			             .filter(MakeFrequencyCorporaMain::isKanji)
+			             .filter(KanjiUtilities::isKanji)
 			             .forEach(codePoint -> kanjiFrequency.add(new String(new int[]{codePoint}, 0, 1),
 			                                                      wordFrequency.getFrequency(index)));
 		}
 
 		return kanjiFrequency.build();
-	}
-
-	@SuppressWarnings("ObjectEquality") // Comparing identity, not equality.
-	private static boolean isKanji(int codePoint) {
-		UnicodeBlock block = UnicodeBlock.of(codePoint);
-
-		return block == UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS ||
-		       block == UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A ||
-		       block == UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B ||
-		       block == UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_C ||
-		       block == UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_D ||
-		       block == UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS ||
-		       block == UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS_SUPPLEMENT;
-	}
-
-	@SuppressWarnings("ObjectEquality") // Comparing identity, not equality.
-	private static boolean isKana(int codePoint) {
-		UnicodeBlock block = UnicodeBlock.of(codePoint);
-		if (block != UnicodeBlock.KATAKANA &&
-		    block != UnicodeBlock.HIRAGANA &&
-		    block != UnicodeBlock.CJK_SYMBOLS_AND_PUNCTUATION) {
-			return false;
-		}
-
-		int type = Character.getType(codePoint);
-
-		// Filter out punctuation and other non-letters
-		return type == Character.OTHER_LETTER ||
-		       type == Character.MODIFIER_LETTER;
 	}
 }

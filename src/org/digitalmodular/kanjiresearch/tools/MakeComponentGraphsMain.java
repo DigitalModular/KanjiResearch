@@ -30,16 +30,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.digitalmodular.graphapi.Graph;
 import org.digitalmodular.graphapi.GraphIO;
 import org.digitalmodular.graphapi.MatrixGraph;
 import org.digitalmodular.kanjiresearch.util.ComponentFileIO;
 import org.digitalmodular.kanjiresearch.util.KanjiList;
+import org.digitalmodular.kanjiresearch.util.KanjiUtilities;
 import org.digitalmodular.kanjiresearch.util.TaggedKanjiList;
 
 /**
@@ -69,7 +67,7 @@ public final class MakeComponentGraphsMain {
 
 	private static void process(String filenameIn) throws IOException {
 		List<TaggedKanjiList> componentLists = ComponentFileIO.read(filenameIn);
-		List<TaggedKanjiList> kanjiLists     = transpose(componentLists);
+		List<TaggedKanjiList> kanjiLists     = KanjiUtilities.transpose(componentLists);
 
 		KanjiList componentSet = collectComponents(componentLists);
 		assert componentSet.size() == NUMBER_OF_JAPANESE_COMPONENTS : componentSet.size();
@@ -82,28 +80,6 @@ public final class MakeComponentGraphsMain {
 		write(graph, filenameIn, "-graph.txt");
 		write(graph, filenameIn, "-graph.conn");
 		write(graph, filenameIn, "-graph.png");
-	}
-
-	private static List<TaggedKanjiList> transpose(Iterable<TaggedKanjiList> componentLists) {
-		Map<Integer, TaggedKanjiList> kanjiLists = new HashMap<>(20000);
-
-		for (TaggedKanjiList componentList : componentLists) {
-			Integer component = componentList.getTag();
-			int     n         = componentList.size();
-			for (int i = 0; i < n; i++) {
-				Integer kanji = componentList.get(i);
-
-				TaggedKanjiList kanjiList = kanjiLists.get(kanji);
-				if (kanjiList == null) {
-					kanjiList = new TaggedKanjiList(kanji);
-					kanjiLists.put(kanji, kanjiList);
-				}
-
-				kanjiList.add(component);
-			}
-		}
-
-		return new ArrayList<>(kanjiLists.values());
 	}
 
 	private static KanjiList collectComponents(Iterable<TaggedKanjiList> componentLists) {
