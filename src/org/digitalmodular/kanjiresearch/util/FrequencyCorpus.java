@@ -44,6 +44,8 @@ public class FrequencyCorpus {
 		requireNonNull(frequencies, "frequencies");
 		if (phrases.length != frequencies.length)
 			throw new IllegalArgumentException("Length mismatch: " + phrases.length + " vs " + frequencies.length);
+		if (phrases.length < 1)
+			throw new IllegalArgumentException("Length should be at least 1: " + phrases.length);
 
 		this.phrases = phrases;
 		this.frequencies = frequencies;
@@ -72,21 +74,21 @@ public class FrequencyCorpus {
 		if (index < 0 || index >= phrases.length)
 			throw new IndexOutOfBoundsException("'index' must be in the range [0, " + (phrases.length - 1) + ']');
 
-		return frequencies[index] / totalFrequency;
+		return frequencies[index] / frequencies[0];
 	}
 
-	public double getLogFrequency(int index) {
+	public double getRelativeFrequency(int index) {
 		if (index < 0 || index >= phrases.length)
 			throw new IndexOutOfBoundsException("'index' must be in the range [0, " + (phrases.length - 1) + ']');
 
-		return Math.log(frequencies[index] / totalFrequency);
+		return frequencies[index] / totalFrequency;
 	}
 
 	@Override
 	public String toString() {
 		try (Formatter formatter = new Formatter(new StringBuilder(phrases.length * 30))) {
 			for (int i = 0; i < phrases.length; i++)
-				formatter.format("%s\t%.8f\n", phrases[i], frequencies[i] / totalFrequency);
+				formatter.format("%s\t%.8f\n", phrases[i], getRelativeFrequency(i));
 
 			return formatter.toString();
 		}
